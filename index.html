@@ -138,7 +138,6 @@
       <div class="share-modal-content">
         <h2>Share your artwork</h2>
         <div class="share-icon-row">
-          <!-- ... icons/buttons as before ... -->
           <!-- Twitter, Instagram, Facebook, Reddit, Download -->
           <button class="share-btn" id="shareTwitter" title="Share on Twitter">
             <svg width="30" height="30" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
@@ -199,9 +198,11 @@
   </footer>
   <!-- === END SITE FOOTER === -->
 
+  <!-- TEMA I JS SKRIPTE, ISPRAVNO UCITANE -->
+  <script src="theme/theme.js"></script>
   <script src="draw.js"></script>
   <script type="module">
-    import { getTodaysTheme } from '/theme/theme.js';
+    import { getTodaysTheme } from './theme/theme.js';
 
     window.addEventListener('DOMContentLoaded', () => {
       const theme = getTodaysTheme();
