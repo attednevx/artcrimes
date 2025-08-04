@@ -3,7 +3,6 @@ export const themes = [
   { date: "2025-08-05", theme: "Rain" },
   { date: "2025-08-06", theme: "Forest" },
   { date: "2025-08-07", theme: "City" },
-  { date: "2025-08-07", theme: "A clown in therapy" },
   { date: "2025-08-08", theme: "A frog who just woke up" },
   { date: "2025-08-09", theme: "Mascot" },
   { date: "2025-08-10", theme: "The mayor of a ghost town" },
@@ -137,7 +136,7 @@ export const themes = [
   { date: "2025-12-16", theme: "The worst tattoo idea" },
   { date: "2025-12-17", theme: "The president of insects" },
   { date: "2025-12-18", theme: "The last superhero on Earth" },
-  ...
+  { date: "2025-08-07", theme: "A clown in therapy" },
 ];
 
 // Funkcija za dohvat današnje teme
@@ -147,3 +146,4 @@ export function getTodaysTheme() {
   return found ? found.theme : "No topic for today!";
 
 }
+
