@@ -201,9 +201,8 @@
   <!-- TEMA I JS SKRIPTE, ISPRAVNO UCITANE -->
   <script src="theme/theme.js"></script>
   <script src="draw.js"></script>
-  <script src="themes.js"></script>
   <script type="module">
-    import { getTodaysTheme } from 'themes.js';
+    import { getTodaysTheme } from './themes.js';
 
     window.addEventListener('DOMContentLoaded', () => {
       const theme = getTodaysTheme();
