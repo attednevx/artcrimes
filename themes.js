@@ -136,7 +136,7 @@ export const themes = [
   { date: "2025-12-16", theme: "The worst tattoo idea" },
   { date: "2025-12-17", theme: "The president of insects" },
   { date: "2025-12-18", theme: "The last superhero on Earth" },
-  { date: "2025-08-07", theme: "A clown in therapy" },
+  { date: "2025-12-19", theme: "A clown in therapy" },
 ];
 
 // Funkcija za dohvat današnje teme
@@ -146,4 +146,5 @@ export function getTodaysTheme() {
   return found ? found.theme : "No topic for today!";
 
 }
+
 
