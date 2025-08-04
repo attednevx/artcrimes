@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Art Crimes</title>
-  <link rel="stylesheet" href="/static/draw.css">
-  <link rel="icon" type="image/png" href="/static/logos/artcrimes-favicon.png">
+  <link rel="stylesheet" href="draw.css">
+  <link rel="icon" type="image/png" href="/logos/artcrimes-favicon.png">
 </head>
 <body>
   <button class="theme-toggle-btn" id="toggleDark" title="Toggle theme">🌙</button>
@@ -199,9 +199,9 @@
   </footer>
   <!-- === END SITE FOOTER === -->
 
-  <script src="/static/draw.js"></script>
+  <script src="draw.js"></script>
   <script type="module">
-    import { getTodaysTheme } from '/static/theme/theme.js';
+    import { getTodaysTheme } from 'theme/theme.js';
 
     window.addEventListener('DOMContentLoaded', () => {
       const theme = getTodaysTheme();
