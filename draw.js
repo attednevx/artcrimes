@@ -1,8 +1,8 @@
 // ==== INFO POPUP LOGIC ====
 // Prikazuj popup svaki put kad uđeš na sajt (bez sessionStorage)
 document.addEventListener("DOMContentLoaded", function () {
-  const infoPopup = document.getElementById('infoPopup');
-  const closeBtn = document.getElementById('closeInfoPopup');
+  const infoPopup = document.getElementById('infoPopup').classList.add('active');
+  const closeBtn = document.getElementById('infoPopup').classList.remove('active');
 
   // Close button handler
   closeBtn.onclick = function () {
