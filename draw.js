@@ -1,13 +1,16 @@
 // ==== INFO POPUP LOGIC ====
 // Prikazuj popup svaki put kad uđeš na sajt (bez sessionStorage)
 document.addEventListener("DOMContentLoaded", function () {
-  const infoPopup = document.getElementById('infoPopup').classList.add('active');
-  const closeBtn = document.getElementById('infoPopup').classList.remove('active');
+  // Prikaži popup svaki put kad se sajt učita
+  const infoPopup = document.getElementById('infoPopup');
+  infoPopup.classList.add('active');
 
   // Close button handler
+  const closeBtn = document.getElementById('closeInfoPopup');
   closeBtn.onclick = function () {
-    infoPopup.style.display = 'none';
+    infoPopup.classList.remove('active');
   };
+});
 
   // UVIJEK prikaži popup na load (nema sessionStorage)
   infoPopup.style.display = 'flex';
