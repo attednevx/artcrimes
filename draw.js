@@ -149,13 +149,13 @@ gridCheckbox.onchange = function() {
 // ==== CANVAS SETUP ====
 const bgCanvas = document.getElementById('bg-canvas');
 const bgCtx = bgCanvas.getContext('2d');
-bgCanvas.width = 1080;
-bgCanvas.height = 1080;
+bgCanvas.width = 1440;
+bgCanvas.height = 1440;
 
 const drawCanvas = document.getElementById('draw-canvas');
 const ctx = drawCanvas.getContext('2d');
-drawCanvas.width = 1080;
-drawCanvas.height = 1080;
+drawCanvas.width = 1440;
+drawCanvas.height = 1440;
 ctx.lineCap = 'round';
 
 function drawBgCanvas() {
