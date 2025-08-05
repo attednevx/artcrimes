@@ -494,6 +494,36 @@ body:not(.dark) b {
   justify-content: center;
 }
 
+@media (max-width: 600px) {
+  .info-popup-content {
+    min-width: unset;
+    max-width: 98vw;
+    min-height: unset;
+    max-height: 90vh;
+    padding: 18px 8px 14px 8px;
+    font-size: 1.12rem;
+    border-radius: 11px;
+    box-shadow: 0 2px 18px rgba(0,0,0,0.22);
+  }
+  .popup-title,
+  .popup-subtitle,
+  .popup-social-label,
+  .popup-contact-label,
+  .popup-social-row,
+  .popup-contact-row {
+    font-size: 1em;
+  }
+  .popup-main-content {
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .popup-close-btn {
+    font-size: 18px;
+    padding: 8px 18px;
+    border-radius: 6px;
+  }
+}
+
 /* === Popup: SVE Labele i hashtag su bijeli, bez obzira na mode === */
 .info-popup-content .popup-title,
 .info-popup-content .popup-subtitle,
