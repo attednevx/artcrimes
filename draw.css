@@ -900,10 +900,10 @@ body:not(.dark) .modern-btn:focus {
   transform: scale(1.08);
 }
 
-body:not(.dark) .site-footer,
 body:not(.dark) .site-footer .footer-social-label,
 body:not(.dark) .site-footer .footer-contact-label,
 body:not(.dark) .site-footer .footer-feedback-label,
 body:not(.dark) .site-footer .footer-copyright {
-  color: #22223a !important;
+  color: #f7f7f7 !important;
+  opacity: 1 !important;
 }
