@@ -496,14 +496,17 @@ body:not(.dark) b {
 
 @media (max-width: 600px) {
   .info-popup-content {
-    min-width: unset;
+    width: 98vw;
     max-width: 98vw;
+    min-width: unset;
     min-height: unset;
-    max-height: 90vh;
-    padding: 18px 8px 14px 8px;
-    font-size: 1.12rem;
-    border-radius: 11px;
+    max-height: 95vh;
+    padding: 22px 10px 18px 10px;
+    font-size: 1.25rem;
+    border-radius: 13px;
     box-shadow: 0 2px 18px rgba(0,0,0,0.22);
+    left: 50%;
+    transform: translateX(-50%);
   }
   .popup-title,
   .popup-subtitle,
@@ -511,16 +514,16 @@ body:not(.dark) b {
   .popup-contact-label,
   .popup-social-row,
   .popup-contact-row {
-    font-size: 1em;
+    font-size: 1.08em;
   }
   .popup-main-content {
-    gap: 16px;
-    margin-bottom: 20px;
+    gap: 18px;
+    margin-bottom: 22px;
   }
   .popup-close-btn {
-    font-size: 18px;
-    padding: 8px 18px;
-    border-radius: 6px;
+    font-size: 20px;
+    padding: 10px 22px;
+    border-radius: 8px;
   }
 }
 
