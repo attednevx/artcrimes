@@ -513,13 +513,33 @@ body:not(.dark) b {
     max-height: 100vh !important;
     min-width: 0 !important;
     min-height: 0 !important;
-    padding: 18px 4vw 14px 4vw !important;
-    font-size: 1.25rem !important;
+    padding: 32px 5vw 22px 5vw !important;      /* VEĆI padding */
+    font-size: 1.45rem !important;              /* VEĆI font */
     border-radius: 0 !important;
     box-shadow: none !important;
     background: #23243a !important;
     z-index: 100000 !important;
     display: block !important;
+    overflow-y: auto !important;                /* Da ne presječe tekst */
+  }
+  .popup-title,
+  .popup-subtitle,
+  .popup-social-label,
+  .popup-contact-label,
+  .popup-social-row,
+  .popup-contact-row {
+    font-size: 1.17em !important;
+  }
+  .popup-main-content {
+    gap: 20px;
+    margin-bottom: 18px;
+  }
+  .popup-close-btn {
+    font-size: 22px !important;
+    padding: 16px 0 !important;
+    border-radius: 0 !important;
+    width: 100%;
+    box-sizing: border-box;
   }
 }
 
