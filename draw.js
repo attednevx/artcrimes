@@ -769,3 +769,48 @@ window.setInterval(updateThemeBtn, 1000); // fallback: update icon every second,
 drawBgCanvas();
 renderAll();
 updateTransform();
+
+// --- Modal logic (za palete) ---
+function setupModal(openId, modalId, closeId) {
+  const openBtn = document.getElementById(openId);
+  const modal = document.getElementById(modalId);
+  const closeBtn = document.getElementById(closeId);
+  openBtn.onclick = () => modal.classList.remove('hidden');
+  closeBtn.onclick = () => modal.classList.add('hidden');
+  window.addEventListener('click', function(e){
+    if (!modal.classList.contains('hidden') && !modal.contains(e.target) && e.target !== openBtn)
+      modal.classList.add('hidden');
+  });
+}
+setupModal('openColorPickerSwatch', 'colorPickerModal', 'closeColorPicker');
+setupModal('openBgPickerSwatch', 'bgPickerModal', 'closeBgPicker');
+
+// Update selected color swatch
+function updateSelectedColorSwatch() {
+  const swatchBtn = document.getElementById('openColorPickerSwatch');
+  swatchBtn.style.background = currentColor; // koristiš var currentColor iz tvoje logike
+}
+// Update selected background swatch
+function updateSelectedBgSwatch() {
+  const bgSwatchBtn = document.getElementById('openBgPickerSwatch');
+  bgSwatchBtn.style.background = bgType === "color" ? bgColor : customBg;
+}
+
+// Otvaranje modala na klik
+document.getElementById('openColorPickerSwatch').onclick = function() {
+  document.getElementById('colorPickerModal').classList.remove('hidden');
+};
+document.getElementById('openBgPickerSwatch').onclick = function() {
+  document.getElementById('bgPickerModal').classList.remove('hidden');
+};
+
+// Pozovi ove funkcije kad god user promijeni boju
+// Dodaj nakon svake promjene boje/backgrounda:
+updateSelectedColorSwatch();
+updateSelectedBgSwatch();
+
+// Primjer: u customColorInput.oninput, u paletama, itd. - dodaj poziv
+// Nakon što user promijeni currentColor:
+updateSelectedColorSwatch();
+// Nakon što user promijeni bgColor/customBg:
+updateSelectedBgSwatch();
