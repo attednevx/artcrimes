@@ -907,3 +907,38 @@ body:not(.dark) .site-footer .footer-copyright {
   color: #f7f7f7 !important;
   opacity: 1 !important;
 }
+
+/* Osnovni footer tekst u light mode-u */
+body:not(.dark) .site-footer,
+body:not(.dark) .site-footer * {
+  color: #f7f7f7 !important;
+  opacity: 1 !important;
+}
+
+/* Separator crte u footeru - da su uvijek vidljive */
+.footer-social-sep,
+.footer-contact-sep {
+  color: #f7f7f7 !important; /* bijelo na tamnoj pozadini */
+  font-weight: bold;
+  font-size: 1.15em;
+  opacity: 1 !important;
+  padding: 0 8px;
+  letter-spacing: 0.2em;
+  vertical-align: middle;
+}
+
+/* U dark modu mogu biti još svjetlije, ako želiš */
+body.dark .footer-social-sep,
+body.dark .footer-contact-sep {
+  color: #fff !important;
+}
+
+/* Labelama daj bold ili svijetlu boju */
+.footer-social-label,
+.footer-contact-label,
+.footer-feedback-label,
+.footer-copyright {
+  color: #f7f7f7 !important;
+  font-weight: bold;
+  opacity: 1 !important;
+}
