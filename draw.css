@@ -942,3 +942,16 @@ body.dark .footer-contact-sep {
   font-weight: bold;
   opacity: 1 !important;
 }
+
+body:not(.dark) .info-popup,
+body:not(.dark) .info-popup *,
+body:not(.dark) .info-popup-content {
+    color: #f7f7f7 !important;
+    opacity: 1 !important;
+}
+
+.popup-hashtag, .info-popup b {
+    color: #fff !important;
+    font-weight: bold;
+    letter-spacing: 0.03em;
+}
