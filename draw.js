@@ -1,4 +1,5 @@
 // ==== INFO POPUP LOGIC ====
+// Prikazuj popup svaki put kad uđeš na sajt (bez sessionStorage)
 document.addEventListener("DOMContentLoaded", function () {
   const infoPopup = document.getElementById('infoPopup');
   const closeBtn = document.getElementById('closeInfoPopup');
@@ -8,13 +9,8 @@ document.addEventListener("DOMContentLoaded", function () {
     infoPopup.style.display = 'none';
   };
 
-  // Show popup only on first visit per session
-  if (!sessionStorage.getItem('hasSeenInfoPopup')) {
-    infoPopup.style.display = 'flex';
-    sessionStorage.setItem('hasSeenInfoPopup', '1');
-  } else {
-    infoPopup.style.display = 'none';
-  }
+  // UVIJEK prikaži popup na load (nema sessionStorage)
+  infoPopup.style.display = 'flex';
 });
 
 // ==== GET TODAY'S WORD FROM BACKEND ====
