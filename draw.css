@@ -28,14 +28,28 @@ h1 {
 
 .canvas-wrap {
   position: relative;
-  width: 100%;
-  max-width: 500px;
+  width: 1440px;
+  height: 1440px;
+  max-width: 100%;
+  max-height: 80vh;
   aspect-ratio: 1/1;
   margin: 0 auto 16px auto;
   border: 2px solid #333;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
   background: transparent;
+  box-sizing: border-box;
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .canvas-wrap {
+    width: 98vw;
+    height: 98vw;
+    max-width: 98vw;
+    max-height: 70vh;
+    border-radius: 12px;
+  }
 }
 
 #bg-canvas, #draw-canvas {
