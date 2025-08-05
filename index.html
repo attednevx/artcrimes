@@ -84,8 +84,19 @@
     <div class="pan-instruction">
         <span>To move the canvas while zoomed on mobile: use two fingers</span>
     </div>
-    <div class="palette-section">
-      <div class="palette-label">Choose color:</div>
+    <!-- === PALETTE & BACKGROUND BUTTONS IN THE SAME ROW === -->
+    <div class="color-bg-row">
+  <label class="color-picker-label" for="openColorPickerSwatch">Color:</label>
+  <button id="openColorPickerSwatch" class="swatch selected-swatch"></button>
+  <label class="color-picker-label" for="openBgPickerSwatch">Background:</label>
+  <button id="openBgPickerSwatch" class="bg-swatch selected-bg-swatch"></button>
+</div>
+    <!-- === MODALS FOR PALETTE & BACKGROUND === -->
+    <div id="colorPickerModal" class="modal hidden">
+      <div class="modal-header">
+        <span>Choose Brush Color</span>
+        <button id="closeColorPicker" class="close-modal-btn">&times;</button>
+      </div>
       <div class="palette-row" id="palette-main"></div>
       <div class="palette-row" id="palette-special"></div>
       <label class="custom-color-label" title="Custom color">
@@ -93,8 +104,11 @@
         <span class="custom-color-btn"></span>
       </label>
     </div>
-    <div class="bg-section">
-      <div class="palette-label">Background:</div>
+    <div id="bgPickerModal" class="modal hidden">
+      <div class="modal-header">
+        <span>Choose Background Color</span>
+        <button id="closeBgPicker" class="close-modal-btn">&times;</button>
+      </div>
       <div class="bg-palette-row" id="bg-palette-main"></div>
       <div class="bg-palette-row" id="bg-palette-special"></div>
       <label class="custom-bg-label" title="Custom background color">
