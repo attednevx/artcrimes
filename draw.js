@@ -626,7 +626,7 @@ document.getElementById('share').onclick = () => {
     tctx.drawImage(drawCanvas,0,0);
     return temp.toDataURL('image/png');
   })();
-  window._shareText = `Today's art crime "${todaysWord}" - #ArtCrimes\nPlay at: ${window.location.origin}`;
+  window._shareText = `Today's art crime "${todaysWord}" - #ArtCrimesGame\nPlay at: ${window.location.origin}`;
 };
 
 function downloadArtImage() {
