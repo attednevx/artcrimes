@@ -11,10 +11,6 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 });
 
-  // UVIJEK prikaži popup na load (nema sessionStorage)
-  infoPopup.style.display = 'flex';
-});
-
 // ==== GET TODAY'S WORD FROM BACKEND ====
 function loadTodaysWord() {
   fetch('/api/todays-word')
