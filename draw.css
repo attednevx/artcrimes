@@ -938,8 +938,7 @@ body.dark .footer-contact-sep {
 /* Labelama daj bold ili svijetlu boju */
 .footer-social-label,
 .footer-contact-label,
-.footer-feedback-label,
-.footer-copyright {
+.footer-feedback-label, {
   color: #f7f7f7 !important;
   font-weight: bold;
   opacity: 1 !important;
