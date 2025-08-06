@@ -956,3 +956,38 @@ body:not(.dark) .info-popup-content {
     font-weight: bold;
     letter-spacing: 0.03em;
 }
+
+.brush-picker-wrap {
+  margin: 18px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+#brushPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.brush-btn {
+  border: 2px solid #333;
+  border-radius: 8px;
+  background: #23243a;
+  color: #fafaff;
+  padding: 7px 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 120px;
+  font-size: 1.01rem;
+  font-weight: 500;
+}
+.brush-btn.selected {
+  border-color: #7b60fa;
+  background: #282850;
+}
+.brush-btn img {
+  width: 32px;
+  height: 16px;
+  object-fit: contain;
+}
