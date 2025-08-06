@@ -260,18 +260,26 @@ function addInterpolatedPoints(points, x, y) {
 }
 
 // ---- Polyline draw with smoothing ----
-function drawPolylineSmooth(ctx, pts, color, width) {
-    if (pts.length < 1) return;
-    ctx.lineWidth = width;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = color;
-    ctx.beginPath();
-    const smoothed = smoothPoints(pts, 4); // windowSize = 4
-    ctx.moveTo(smoothed[0].x, smoothed[0].y);
-    for (let i = 1; i < smoothed.length; i++) {
-        ctx.lineTo(smoothed[i].x, smoothed[i].y);
-    }
-    ctx.stroke();
+function drawPolylineSmooth(ctx, points, color, lineWidth) {
+  if (points.length < 2) return;
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  // Quadratic smoothing
+  for (let i = 1; i < points.length - 1; i++) {
+    // Sredina između tekuće i sljedeće tačke
+    const midX = (points[i].x + points[i+1].x) / 2;
+    const midY = (points[i].y + points[i+1].y) / 2;
+    ctx.quadraticCurveTo(points[i].x, points[i].y, midX, midY);
+  }
+  // Posljednja tačka
+  ctx.lineTo(points[points.length-1].x, points[points.length-1].y);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lineWidth;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.stroke();
+  ctx.restore();
 }
 
 function renderAll() {
