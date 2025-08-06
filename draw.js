@@ -70,6 +70,7 @@ function buildPalette(rowElem, colorList, isSpecial=false) {
       fillMode = false;
       document.getElementById('eraser').classList.remove('active');
       document.getElementById('fill').classList.remove('active');
+      updateSelectedColorSwatch();
     };
     rowElem.appendChild(swatch);
   });
@@ -88,6 +89,7 @@ customColorInput.oninput = (e) => {
   document.getElementById('eraser').classList.remove('active');
   document.getElementById('fill').classList.remove('active');
   document.querySelector('.custom-color-btn').style.background = currentColor;
+  updateSelectedColorSwatch();
 };
 function setActiveSwatch(activeBtn) {
   document.querySelectorAll('.swatch').forEach(btn => btn.classList.remove('active'));
@@ -113,6 +115,7 @@ function buildBgPalette(rowElem, colorList, isSpecial=false) {
       bgType = "color";
       bgColor = col.color;
       drawBgCanvas();
+      updateSelectedBgSwatch();
     };
     rowElem.appendChild(swatch);
   });
@@ -128,6 +131,7 @@ customBgInput.oninput = (e) => {
   setActiveBgSwatch(null);
   document.querySelector('.custom-bg-btn').style.background = customBg;
   drawBgCanvas();
+  updateSelectedBgSwatch();
 };
 function setActiveBgSwatch(activeBtn) {
   document.querySelectorAll('.bg-swatch').forEach(btn => btn.classList.remove('active'));
@@ -153,7 +157,6 @@ drawCanvas.height = 900;
 ctx.lineCap = 'round';
 
 function drawBgCanvas() {
-  // Use theme from body class
   const isDark = document.body.classList.contains('dark');
   bgCtx.save();
   bgCtx.globalAlpha = 1;
@@ -172,7 +175,51 @@ function drawBgCanvas() {
   bgCtx.restore();
 }
 
-// ==== TOOLS ==== 
+// ==== BRUSH TYPES ====
+const BRUSH_TYPES = [
+  { id: "basic", label: "Četka" },
+  { id: "calligraphy", label: "Četkica za kaligrafiju" },
+  { id: "calligraphy-pen", label: "Olovka za kaligrafiju" },
+  { id: "airbrush", label: "Airbrush" },
+  { id: "oil", label: "Četkica za ulje" },
+  { id: "crayon", label: "Masna bojica" },
+  { id: "marker", label: "Marker" },
+  { id: "pencil", label: "Obična olovka" },
+  { id: "watercolor", label: "Četka za vodene boje" },
+];
+let currentBrushType = "basic";
+
+// ==== BRUSH PICKER UI ====
+function buildBrushPicker() {
+  const brushPickerWrap = document.createElement("div");
+  brushPickerWrap.className = "brush-picker-wrap";
+  brushPickerWrap.innerHTML = `
+    <label style="margin-bottom:5px;font-weight:600;" for="brushPicker">Brush</label>
+    <div id="brushPicker"></div>
+  `;
+  // Smjesti ispod BG palete, iznad LineWidth
+  const bgPalette = document.getElementById("bg-palette-special");
+  if (bgPalette) {
+    bgPalette.parentElement.parentElement.insertAdjacentElement("afterend", brushPickerWrap);
+  }
+  const brushPicker = brushPickerWrap.querySelector("#brushPicker");
+  BRUSH_TYPES.forEach(brush => {
+    const btn = document.createElement("button");
+    btn.className = "brush-btn";
+    btn.dataset.type = brush.id;
+    btn.innerHTML = `<span>${brush.label}</span>`;
+    btn.onclick = () => {
+      document.querySelectorAll(".brush-btn").forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      currentBrushType = brush.id;
+    };
+    brushPicker.appendChild(btn);
+    if (brush.id === currentBrushType) btn.classList.add('selected');
+  });
+}
+document.addEventListener("DOMContentLoaded", buildBrushPicker);
+
+// ==== TOOLS ====
 const lineWidthInput = document.getElementById('lineWidth');
 const lineWidthValue = document.getElementById('lineWidthValue');
 let lineWidth = parseInt(lineWidthInput.value, 10);
@@ -225,19 +272,19 @@ let previewImage = null;
 
 // ---- Smoothing helper ----
 function smoothPoints(points, windowSize = 4) {
-    if (points.length <= 2) return points;
-    const smoothed = [];
-    for (let i = 0; i < points.length; i++) {
-        let sumX = 0, sumY = 0, count = 0;
-        for (let j = -Math.floor(windowSize/2); j <= Math.floor(windowSize/2); j++) {
-            const idx = Math.min(points.length-1, Math.max(0, i+j));
-            sumX += points[idx].x;
-            sumY += points[idx].y;
-            count++;
-        }
-        smoothed.push({x: sumX/count, y: sumY/count});
+  if (points.length <= 2) return points;
+  const smoothed = [];
+  for (let i = 0; i < points.length; i++) {
+    let sumX = 0, sumY = 0, count = 0;
+    for (let j = -Math.floor(windowSize/2); j <= Math.floor(windowSize/2); j++) {
+      const idx = Math.min(points.length-1, Math.max(0, i+j));
+      sumX += points[idx].x;
+      sumY += points[idx].y;
+      count++;
     }
-    return smoothed;
+    smoothed.push({x: sumX/count, y: sumY/count});
+  }
+  return smoothed;
 }
 
 // ---- Interpolation helper ----
@@ -248,8 +295,8 @@ function addInterpolatedPoints(points, x, y) {
   }
   const last = points[points.length - 1];
   const dist = Math.hypot(x - last.x, y - last.y);
-  if (dist > 6) { // threshold, možeš testirati 6, 8, 10 px
-    const steps = Math.floor(dist / 4); // koliko tačaka da dodamo
+  if (dist > 6) {
+    const steps = Math.floor(dist / 4);
     for (let i = 1; i < steps; i++) {
       const nx = last.x + (x - last.x) * (i / steps);
       const ny = last.y + (y - last.y) * (i / steps);
@@ -259,20 +306,152 @@ function addInterpolatedPoints(points, x, y) {
   points.push({x, y});
 }
 
+// ==== BRUSH ENGINE ====
+// Funkcije za različite četkice
+function drawBrushStroke(ctx, points, color, width) {
+  drawPolylineSmooth(ctx, points, color, width);
+}
+function drawCalligraphyBrush(ctx, points, color, width) {
+  for (let i = 1; i < points.length; i++) {
+    let p0 = points[i-1], p1 = points[i];
+    let angle = Math.atan2(p1.y-p0.y, p1.x-p0.x);
+    ctx.save();
+    ctx.translate(p1.x, p1.y);
+    ctx.rotate(angle);
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.9;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, width, width * 0.45, 0, 0, 2*Math.PI);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+function drawCalligraphyPen(ctx, points, color, width) {
+  for (let i = 1; i < points.length; i++) {
+    let p0 = points[i-1], p1 = points[i];
+    let angle = Math.PI / 6;
+    ctx.save();
+    ctx.translate(p1.x, p1.y);
+    ctx.rotate(angle);
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.7;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, width*0.7, width*0.25, 0, 0, 2*Math.PI);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+function drawAirbrush(ctx, points, color, width) {
+  for (let i = 0; i < points.length; i++) {
+    for (let j = 0; j < 12; j++) {
+      let angle = Math.random() * 2 * Math.PI;
+      let radius = Math.random() * width * 0.8;
+      let dx = Math.cos(angle) * radius;
+      let dy = Math.sin(angle) * radius;
+      ctx.save();
+      ctx.globalAlpha = 0.10 + Math.random() * 0.12;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(points[i].x + dx, points[i].y + dy, width * 0.23, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+}
+function drawOilBrush(ctx, points, color, width) {
+  for (let i = 1; i < points.length; i++) {
+    ctx.save();
+    ctx.globalAlpha = 0.32 + Math.random()*0.25;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width * (0.8 + Math.random()*0.5);
+    ctx.beginPath();
+    ctx.moveTo(points[i-1].x, points[i-1].y);
+    ctx.lineTo(points[i].x, points[i].y);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+function drawCrayon(ctx, points, color, width) {
+  for (let i = 1; i < points.length; i++) {
+    ctx.save();
+    ctx.globalAlpha = 0.38 + Math.random()*0.15;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width * (0.6 + Math.random()*0.3);
+    ctx.setLineDash([1, Math.random()*4+1]);
+    ctx.beginPath();
+    ctx.moveTo(points[i-1].x, points[i-1].y);
+    ctx.lineTo(points[i].x, points[i].y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+}
+function drawMarker(ctx, points, color, width) {
+  ctx.save();
+  ctx.globalAlpha = 0.85;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width * 1.15;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let i=1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+  ctx.stroke();
+  ctx.restore();
+}
+function drawPencil(ctx, points, color, width) {
+  for (let i = 1; i < points.length; i++) {
+    ctx.save();
+    ctx.globalAlpha = 0.18 + Math.random()*0.25;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(points[i-1].x, points[i-1].y);
+    ctx.lineTo(points[i].x, points[i].y);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+function drawWatercolor(ctx, points, color, width) {
+  for (let i = 1; i < points.length; i++) {
+    ctx.save();
+    ctx.globalAlpha = 0.13 + Math.random()*0.19;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width * (0.95 + Math.random()*0.25);
+    ctx.beginPath();
+    ctx.moveTo(points[i-1].x, points[i-1].y);
+    ctx.lineTo(points[i].x, points[i].y);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+function drawByBrushType(ctx, points, color, width) {
+  switch (currentBrushType) {
+    case "basic": drawBrushStroke(ctx, points, color, width); break;
+    case "calligraphy": drawCalligraphyBrush(ctx, points, color, width); break;
+    case "calligraphy-pen": drawCalligraphyPen(ctx, points, color, width); break;
+    case "airbrush": drawAirbrush(ctx, points, color, width); break;
+    case "oil": drawOilBrush(ctx, points, color, width); break;
+    case "crayon": drawCrayon(ctx, points, color, width); break;
+    case "marker": drawMarker(ctx, points, color, width); break;
+    case "pencil": drawPencil(ctx, points, color, width); break;
+    case "watercolor": drawWatercolor(ctx, points, color, width); break;
+    default: drawBrushStroke(ctx, points, color, width);
+  }
+}
+
 // ---- Polyline draw with smoothing ----
 function drawPolylineSmooth(ctx, points, color, lineWidth) {
   if (points.length < 2) return;
   ctx.save();
   ctx.beginPath();
   ctx.moveTo(points[0].x, points[0].y);
-  // Quadratic smoothing
   for (let i = 1; i < points.length - 1; i++) {
-    // Sredina između tekuće i sljedeće tačke
     const midX = (points[i].x + points[i+1].x) / 2;
     const midY = (points[i].y + points[i+1].y) / 2;
     ctx.quadraticCurveTo(points[i].x, points[i].y, midX, midY);
   }
-  // Posljednja tačka
   ctx.lineTo(points[points.length-1].x, points[points.length-1].y);
   ctx.strokeStyle = color;
   ctx.lineWidth = lineWidth;
@@ -286,7 +465,7 @@ function renderAll() {
   ctx.clearRect(0,0,drawCanvas.width,drawCanvas.height);
   for (const act of actions) {
     if (act.type === "line") {
-      drawPolylineSmooth(ctx, act.points, act.color, act.width);
+      drawByBrushType(ctx, act.points, act.color, act.width);
     } else if (act.type === "fill") {
       floodFill(ctx, act.x, act.y, hexToRgba(act.color), act.tolerance, act.expand);
     } else if (act.type === "clear") {
@@ -294,6 +473,7 @@ function renderAll() {
     }
   }
 }
+
 document.getElementById('undo').onclick = () => {
   if (actions.length > 0) {
     redoActions.push(actions.pop());
@@ -332,7 +512,6 @@ function updateTransform() {
   const wrap = document.getElementById('canvasWrap');
   const w = wrap.offsetWidth, h = wrap.offsetHeight;
 
-  // Na 100% zooma: canvas pokriva wrapper, nema panninga
   if (zoomLevel <= 1) {
     panX = 0;
     panY = 0;
@@ -342,7 +521,6 @@ function updateTransform() {
     return;
   }
 
-  // Kada je zoom > 1: dozvoli panning, ali ograniči da canvas pokriva wrapper
   const maxPanX = (w * (zoomLevel - 1)) / 2;
   const maxPanY = (h * (zoomLevel - 1)) / 2;
 
@@ -395,9 +573,9 @@ drawCanvas.addEventListener('mousemove', function(e) {
   }
   if (!isDrawing || fillMode || panMode) return;
   const { x, y } = getCanvasCoords(e);
-  addInterpolatedPoints(currentPoints, x, y); // interpolate missing points!
+  addInterpolatedPoints(currentPoints, x, y);
   ctx.putImageData(previewImage, 0, 0);
-  drawPolylineSmooth(ctx, currentPoints, eraserMode
+  drawByBrushType(ctx, currentPoints, eraserMode
     ? (bgType === "color" ? bgColor : bgType === "custom" ? customBg : "#fff")
     : currentColor,
     lineWidth
@@ -420,7 +598,7 @@ window.addEventListener('mouseup', function(e) {
       ctx.fill();
       ctx.restore();
     } else {
-      drawPolylineSmooth(ctx, currentPoints, eraserMode
+      drawByBrushType(ctx, currentPoints, eraserMode
         ? (bgType === "color" ? bgColor : bgType === "custom" ? customBg : "#fff")
         : currentColor,
         lineWidth
@@ -432,7 +610,8 @@ window.addEventListener('mouseup', function(e) {
       color: eraserMode
         ? (bgType === "color" ? bgColor : bgType === "custom" ? customBg : "#fff")
         : currentColor,
-      width: lineWidth
+      width: lineWidth,
+      brush: currentBrushType
     });
     redoActions = [];
     currentPoints = [];
@@ -455,7 +634,7 @@ drawCanvas.addEventListener('mouseleave', function(e) {
       ctx.fill();
       ctx.restore();
     } else {
-      drawPolylineSmooth(ctx, currentPoints, eraserMode
+      drawByBrushType(ctx, currentPoints, eraserMode
         ? (bgType === "color" ? bgColor : bgType === "custom" ? customBg : "#fff")
         : currentColor,
         lineWidth
@@ -467,7 +646,8 @@ drawCanvas.addEventListener('mouseleave', function(e) {
       color: eraserMode
         ? (bgType === "color" ? bgColor : bgType === "custom" ? customBg : "#fff")
         : currentColor,
-      width: lineWidth
+      width: lineWidth,
+      brush: currentBrushType
     });
     redoActions = [];
     currentPoints = [];
@@ -537,7 +717,7 @@ function floodFill(ctx, startX, startY, fillColor, tolerance = 16, expand = 0) {
     stack.push([x, y - 1]);
   }
 
-  // EXPAND FILL - at the edge of filled area
+  // EXPAND FILL
   if (expand > 0) {
     for (let r = 0; r < expand; r++) {
       let newFilled = filled.slice();
@@ -623,7 +803,6 @@ document.getElementById('clear').onclick = () => {
 // ==== SHARE ====
 document.getElementById('share').onclick = () => {
   document.getElementById('shareModal').style.display = 'flex';
-  // Generiši shareText i sliku
   const todaysWord = document.getElementById('word').textContent;
   window._artImageData = (() => {
     const temp = document.createElement('canvas');
@@ -644,19 +823,15 @@ function downloadArtImage() {
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
-// Twitter: otvori tweet (bez automatskog downloada slike)
 document.getElementById('shareTwitter').onclick = () => {
   window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(window._shareText)}`);
 };
-// Instagram: otvori Instagram (upload mora biti ručno, bez automatskog downloada)
 document.getElementById('shareInstagram').onclick = () => {
   window.open(`https://www.instagram.com/`);
 };
-// Facebook: otvori FB share dialog sa tekstom/linkom (bez automatskog downloada)
 document.getElementById('shareFacebook').onclick = () => {
   window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(window._shareText)}`);
 };
-// Reddit: otvori Reddit submit (upload slike mora biti ručno, bez automatskog downloada)
 document.getElementById('shareReddit').onclick = () => {
   window.open(`https://www.reddit.com/r/artcrimes/submit?title=${encodeURIComponent(window._shareText)}`);
 };
@@ -666,13 +841,11 @@ document.getElementById('closeModal').onclick = () => {
 };
 
 // === TOUCH EVENTS FOR MOBILE ===
-// --- Panning sa dva prsta kad je zoom ---
 let isTouchPanning = false;
 let touchPanStartX = 0, touchPanStartY = 0, touchPanOriginX = 0, touchPanOriginY = 0;
 
 drawCanvas.addEventListener('touchstart', function(e) {
   if (zoomLevel > 1 && e.touches.length === 2) {
-    // Dva prsta = panning
     isTouchPanning = true;
     touchPanStartX = e.touches[0].clientX;
     touchPanStartY = e.touches[0].clientY;
@@ -680,7 +853,6 @@ drawCanvas.addEventListener('touchstart', function(e) {
     touchPanOriginY = panY;
     return;
   }
-  // Jedan prst = crtanje
   if (e.touches.length === 1) {
     e.preventDefault();
     isDrawing = true;
@@ -707,9 +879,9 @@ drawCanvas.addEventListener('touchmove', function(e) {
   e.preventDefault();
   const touch = e.touches[0];
   const { x, y } = getCanvasCoords(touch);
-  addInterpolatedPoints(currentPoints, x, y); // interpolate missing points!
+  addInterpolatedPoints(currentPoints, x, y);
   ctx.putImageData(previewImage, 0, 0);
-  drawPolylineSmooth(ctx, currentPoints, eraserMode
+  drawByBrushType(ctx, currentPoints, eraserMode
     ? (bgType === "color" ? bgColor : bgType === "custom" ? customBg : "#fff")
     : currentColor,
     lineWidth
@@ -717,12 +889,10 @@ drawCanvas.addEventListener('touchmove', function(e) {
 }, { passive: false });
 
 drawCanvas.addEventListener('touchend', function(e) {
-  // Završetak panninga
   if (isTouchPanning && (e.touches.length < 2 || zoomLevel <= 1)) {
     isTouchPanning = false;
     return;
   }
-  // Završetak crtanja
   if (isDrawing && e.touches.length === 0) {
     e.preventDefault();
     isDrawing = false;
@@ -739,7 +909,7 @@ drawCanvas.addEventListener('touchend', function(e) {
       ctx.fill();
       ctx.restore();
     } else {
-      drawPolylineSmooth(ctx, currentPoints, eraserMode
+      drawByBrushType(ctx, currentPoints, eraserMode
         ? (bgType === "color" ? bgColor : bgType === "custom" ? customBg : "#fff")
         : currentColor,
         lineWidth
@@ -751,7 +921,8 @@ drawCanvas.addEventListener('touchend', function(e) {
       color: eraserMode
         ? (bgType === "color" ? bgColor : bgType === "custom" ? customBg : "#fff")
         : currentColor,
-      width: lineWidth
+      width: lineWidth,
+      brush: currentBrushType
     });
     redoActions = [];
     currentPoints = [];
@@ -765,8 +936,8 @@ function updateThemeBtn() {
   themeBtn.textContent = document.body.classList.contains('dark') ? "☀️" : "🌙";
 }
 document.addEventListener("DOMContentLoaded", updateThemeBtn);
-document.addEventListener("themeChange", updateThemeBtn); // in case theme.js triggers this custom event
-window.setInterval(updateThemeBtn, 1000); // fallback: update icon every second, in case theme changes elsewhere
+document.addEventListener("themeChange", updateThemeBtn);
+window.setInterval(updateThemeBtn, 1000);
 
 drawBgCanvas();
 renderAll();
@@ -787,32 +958,22 @@ function setupModal(openId, modalId, closeId) {
 setupModal('openColorPickerSwatch', 'colorPickerModal', 'closeColorPicker');
 setupModal('openBgPickerSwatch', 'bgPickerModal', 'closeBgPicker');
 
-// Update selected color swatch
+// Update selected color/background swatch
 function updateSelectedColorSwatch() {
   const swatchBtn = document.getElementById('openColorPickerSwatch');
-  swatchBtn.style.background = currentColor; // koristiš var currentColor iz tvoje logike
+  swatchBtn.style.background = currentColor;
 }
-// Update selected background swatch
 function updateSelectedBgSwatch() {
   const bgSwatchBtn = document.getElementById('openBgPickerSwatch');
   bgSwatchBtn.style.background = bgType === "color" ? bgColor : customBg;
 }
-
-// Otvaranje modala na klik
 document.getElementById('openColorPickerSwatch').onclick = function() {
   document.getElementById('colorPickerModal').classList.remove('hidden');
 };
 document.getElementById('openBgPickerSwatch').onclick = function() {
   document.getElementById('bgPickerModal').classList.remove('hidden');
 };
-
-// Pozovi ove funkcije kad god user promijeni boju
-// Dodaj nakon svake promjene boje/backgrounda:
 updateSelectedColorSwatch();
 updateSelectedBgSwatch();
-
-// Primjer: u customColorInput.oninput, u paletama, itd. - dodaj poziv
-// Nakon što user promijeni currentColor:
-updateSelectedColorSwatch();
-// Nakon što user promijeni bgColor/customBg:
-updateSelectedBgSwatch();
+customColorInput.oninput && customColorInput.oninput();
+customBgInput.oninput && customBgInput.oninput();
