@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,20 +8,21 @@
 </head>
 <body>
   <button class="theme-toggle-btn" id="toggleDark" title="Toggle theme">🌙</button>
+
   <!-- === POPUP MODAL === -->
   <div id="infoPopup" class="info-popup">
-  <div class="info-popup-content">
-    <h2 class="popup-title">Art Crimes</h2>
-    <div class="popup-main-content">
-      <div class="popup-subtitle">How to play:</div>
-      <div class="popup-rules">
-        <div>Draw today's topic in the most funniest, weirdest or ugliest way. Use your limitless imagination.</div>
-        <div>Use color palette, background, eraser, fill and zoom for your art crime.</div>
-        <div>Share your artwork on social media with <b>#ArtCrimesGame</b></div>
-        <div>For the best experience we recommend playing on desktop.</div>
+    <div class="info-popup-content">
+      <h2 class="popup-title">Art Crimes</h2>
+      <div class="popup-main-content">
+        <div class="popup-subtitle">How to play:</div>
+        <div class="popup-rules">
+          <div>Draw today's topic in the most funniest, weirdest or ugliest way. Use your limitless imagination.</div>
+          <div>Use color palette, background, eraser, fill and zoom for your art crime.</div>
+          <div>Share your artwork on social media with <b>#ArtCrimesGame</b></div>
+          <div>For the best experience we recommend playing on desktop.</div>
+        </div>
       </div>
-    </div>
-    <div class="popup-social-row">
+      <div class="popup-social-row">
         <span class="popup-social-label">Follow us:</span>
         <a href="https://reddit.com/r/artcrimes" target="_blank" rel="noopener" class="popup-social-btn" title="Reddit">
           <svg width="22" height="22" viewBox="0 0 512 512" style="vertical-align: middle;">
@@ -48,7 +48,6 @@
         </a>
         <span class="popup-social-sep">|</span>
         <a href="https://instagram.com/artcrimesgame" target="_blank" rel="noopener" class="popup-social-btn" title="Instagram">
-          <!-- Instagram SVG -->
           <svg width="30" height="30" viewBox="0 0 24 24" fill="#E1306C">
             <path d="M7.75 2h8.5C19.1 2 22 4.9 22 7.75v8.5c0 2.85-2.9 5.75-5.75 5.75h-8.5C4.9 22 2 19.1 2 16.25v-8.5C2 4.9 4.9 2 7.75 2zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5A4.25 4.25 0 0 0 16.25 3.5h-8.5zm4.25 3.25a5.25 5.25 0 1 1 0 10.5 5.25 5.25 0 0 1 0-10.5zm0 1.5a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5zm6.25.75a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0z"/>
           </svg>
@@ -56,17 +55,40 @@
       </div>
       <div class="popup-contact-row">
         <span class="popup-contact-label">Contact:</span>
-        <a href="mailto:artcrimesgame@gmail.com" class="popup-email-link">artcrimesgame@gmail.com</a>
+        <a href="/cdn-cgi/l/email-protection#a0c1d2d4c3d2c9cdc5d3c7c1cdc5e0c7cdc1c9cc8ec3cfcd" class="popup-email-link"><span class="__cf_email__" data-cfemail="7a1b080e190813171f091d1b171f3a1d171b131654191517">[email&#160;protected]</span></a>
       </div>
       <div class="popup-disclaimer">
-      This website is free to use, at your own risk, and does not collect any personal data.
+        This website is free to use, at your own risk, and does not collect any personal data.
+      </div>
+      <button id="closeInfoPopup" class="popup-close-btn">Close</button>
     </div>
-    <button id="closeInfoPopup" class="popup-close-btn">Close</button>
   </div>
-</div>
   <!-- === END POPUP MODAL === -->
+
+  <!-- === CONFIRMATION POPUP === -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+      <h3>🚨 Submit your Art Crime?</h3>
+      <img id="confirmPreview" class="confirm-preview" src="" alt="Your drawing preview"/>
+      <div class="confirm-warning">
+        ⚠️ Once submitted, you won't be able to submit again until tomorrow's topic!
+      </div>
+      <div class="confirm-btn-row">
+        <button class="confirm-no" id="confirmNo">Cancel</button>
+        <button class="confirm-yes" id="confirmYes">Submit!</button>
+      </div>
+    </div>
+  </div>
+  <!-- === END CONFIRMATION POPUP === -->
+
   <div class="container">
     <h1 style="margin-top:36px;">Today's topic: <span id="word">...</span></h1>
+
+    <!-- === COUNTDOWN TIMER === -->
+    <div class="next-topic-timer">
+      Next topic in: <span id="countdown">--:--:--</span>
+    </div>
+
     <div class="canvas-wrap" id="canvasWrap">
       <canvas id="bg-canvas" width="1200" height="900"></canvas>
       <canvas id="draw-canvas" width="1200" height="900"></canvas>
@@ -83,15 +105,17 @@
       🖐️ <span>To move the canvas while zoomed: hold <b>SPACE</b> and drag with mouse</span>
     </div>
     <div class="pan-instruction">
-        <span>To move the canvas while zoomed on mobile: use two fingers</span>
+      <span>To move the canvas while zoomed on mobile: use two fingers</span>
     </div>
-    <!-- === PALETTE & BACKGROUND BUTTONS IN THE SAME ROW === -->
+
+    <!-- === PALETTE & BACKGROUND BUTTONS === -->
     <div class="color-bg-row">
-  <label class="color-picker-label" for="openColorPickerSwatch">Color:</label>
-  <button id="openColorPickerSwatch" class="swatch selected-swatch"></button>
-  <label class="color-picker-label" for="openBgPickerSwatch">Background:</label>
-  <button id="openBgPickerSwatch" class="bg-swatch selected-bg-swatch"></button>
-</div>
+      <label class="color-picker-label" for="openColorPickerSwatch">Color:</label>
+      <button id="openColorPickerSwatch" class="swatch selected-swatch"></button>
+      <label class="color-picker-label" for="openBgPickerSwatch">Background:</label>
+      <button id="openBgPickerSwatch" class="bg-swatch selected-bg-swatch"></button>
+    </div>
+
     <!-- === MODALS FOR PALETTE & BACKGROUND === -->
     <div id="colorPickerModal" class="modal hidden">
       <div class="modal-header">
@@ -118,7 +142,8 @@
       </label>
       <label class="grid-checkbox-label"><input type="checkbox" id="gridCheckbox"/> Grid</label>
     </div>
-    <!-- ==== TOOLS SECTION: Line width + buttons ==== -->
+
+    <!-- ==== TOOLS SECTION ==== -->
     <div class="tools-section">
       <div class="tools-top-row">
         <label class="line-width-label">
@@ -146,14 +171,15 @@
       </div>
     </div>
     <!-- ==== END TOOLS SECTION ==== -->
+
     <div class="controls">
       <button id="share" class="share-btn-main">Share</button>
     </div>
+
     <div id="shareModal" class="share-modal" style="display:none;">
       <div class="share-modal-content">
         <h2>Share your artwork</h2>
         <div class="share-icon-row">
-          <!-- Twitter, Instagram, Facebook, Reddit, Download -->
           <button class="share-btn" id="shareTwitter" title="Share on Twitter">
             <svg width="30" height="30" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
               <rect width="40" height="40" fill="#000"/>
@@ -179,10 +205,34 @@
         <button id="closeModal" style="margin-top:15px;">Close</button>
       </div>
     </div>
+
     <p id="info">Draw your version of the topic above and share your artwork on social media with <b>#ArtCrimesGame</b></p>
+
+    <!-- === SUBMIT SECTION === -->
+    <div class="submit-section">
+      <input
+        type="text"
+        id="displayName"
+        placeholder="Your name (optional)"
+        maxlength="24"
+        class="name-input"
+      />
+      <button id="submitDrawing" class="submit-btn">🚨 Submit Crime</button>
+      <span id="submitStatus" class="submit-status"></span>
+    </div>
+    <div id="alreadySubmittedMsg" class="already-submitted-msg" style="display:none;">
+      ✅ You already submitted today's crime. Come back tomorrow for a new topic!
+    </div>
+
+    <!-- === GALLERY SECTION === -->
+    <div class="gallery-section">
+      <h2 class="gallery-title">Today's Crime Scene 🚨</h2>
+      <div id="gallery" class="gallery-grid"></div>
+    </div>
+
   </div>
 
-  <!-- === SITE FOOTER: SOCIALS, CONTACT, FEEDBACK/SUGGESTION === -->
+  <!-- === SITE FOOTER === -->
   <footer class="site-footer">
     <div class="footer-social-row">
       <span class="footer-social-label">Follow us:</span>
@@ -200,29 +250,162 @@
     </div>
     <div class="footer-contact-row">
       <span class="footer-contact-label">Contact:</span>
-      <a href="mailto:artcrimesgame@gmail.com" class="footer-email-link">artcrimesgame@gmail.com</a>
+      <a href="/cdn-cgi/l/email-protection#3455464057465d59514753555951745359555d581a575b59" class="footer-email-link"><span class="__cf_email__" data-cfemail="3253404651405b5f574155535f5772555f535b5e1c515d5f">[email&#160;protected]</span></a>
       <span class="footer-contact-sep">|</span>
       <span class="footer-feedback-label">Feedback/Suggestion:</span>
-      <a href="mailto:artcrimesfeedback@gmail.com" class="footer-email-link">artcrimesfeedback@gmail.com</a>
+      <a href="/cdn-cgi/l/email-protection#d3b2a1a7b0a1babeb6a0b5b6b6b7b1b2b0b893b4beb2babffdb0bcbe" class="footer-email-link"><span class="__cf_email__" data-cfemail="1273606671607b7f7761747777767073717952757f737b7e3c717d7f">[email&#160;protected]</span></a>
     </div>
     <div class="footer-branding-row">
-      <span class="footer-copyright">
-        © 2025 Art Crimes. All rights reserved.
-      </span>
+      <span class="footer-copyright">© 2025 Art Crimes. All rights reserved.</span>
     </div>
   </footer>
   <!-- === END SITE FOOTER === -->
 
-  <!-- TEMA I JS SKRIPTE, ISPRAVNO UCITANE -->
-  <script src="theme/theme.js"></script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="theme/theme.js"></script>
   <script src="draw.js"></script>
   <script type="module">
     import { getTodaysTheme } from './themes.js';
+    import { submitDrawing, getTodaysSubmissions } from './gallery.js';
 
+    const today = new Date().toISOString().slice(0, 10);
+
+    // ── Topic ──────────────────────────────────────────────
     window.addEventListener('DOMContentLoaded', () => {
-      const theme = getTodaysTheme();
-      document.getElementById('word').textContent = theme;
+      document.getElementById('word').textContent = getTodaysTheme();
+      checkAlreadySubmitted();
+      loadGallery();
+      startCountdown();
     });
+
+    // ── Countdown to midnight (local time) ────────────────
+    function startCountdown() {
+      function update() {
+        const now = new Date();
+        const midnight = new Date();
+        midnight.setHours(24, 0, 0, 0);
+        const diff = midnight - now;
+        const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
+        const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+        const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+        document.getElementById('countdown').textContent = `${h}:${m}:${s}`;
+      }
+      update();
+      setInterval(update, 1000);
+    }
+
+    // ── Daily submit limit via localStorage ───────────────
+    function checkAlreadySubmitted() {
+      if (localStorage.getItem('artcrimes_submitted') === today) {
+        lockSubmitButton();
+      }
+    }
+
+    function lockSubmitButton() {
+      document.getElementById('submitDrawing').disabled = true;
+      document.getElementById('submitDrawing').title = 'You already submitted today!';
+      document.getElementById('alreadySubmittedMsg').style.display = 'block';
+    }
+
+    function markAsSubmitted() {
+      localStorage.setItem('artcrimes_submitted', today);
+      lockSubmitButton();
+    }
+
+    // ── Gallery ────────────────────────────────────────────
+    function timeAgo(dateStr) {
+      const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+      if (diff < 60) return `${diff}s ago`;
+      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+      return `${Math.floor(diff / 86400)}d ago`;
+    }
+
+    function renderGallery(submissions) {
+      const grid = document.getElementById('gallery');
+      if (!submissions.length) {
+        grid.innerHTML = '<p style="color:#aaa; grid-column:1/-1;">No submissions yet today. Be the first! 🎨</p>';
+        return;
+      }
+      grid.innerHTML = submissions.map(s => {
+        const rot = (Math.random() * 4 - 2).toFixed(2);
+        return `
+          <div class="gallery-card" style="--rot: ${rot}deg">
+            <img src="${s.image_url}" alt="Submission by ${s.display_name}" loading="lazy"/>
+            <div class="gallery-card-info">
+              <span>🎨 ${s.display_name || 'Anonymous'}</span>
+              <span>${timeAgo(s.created_at)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function loadGallery() {
+      const submissions = await getTodaysSubmissions();
+      renderGallery(submissions);
+    }
+
+    // ── Merge canvases helper ──────────────────────────────
+    function buildMergedCanvas() {
+      const bgCanvas = document.getElementById('bg-canvas');
+      const drawCanvas = document.getElementById('draw-canvas');
+      const merged = document.createElement('canvas');
+      merged.width = drawCanvas.width;
+      merged.height = drawCanvas.height;
+      const ctx = merged.getContext('2d');
+      ctx.drawImage(bgCanvas, 0, 0);
+      ctx.drawImage(drawCanvas, 0, 0);
+      return merged;
+    }
+
+    // ── Submit button → show confirmation popup ────────────
+    document.getElementById('submitDrawing').addEventListener('click', () => {
+      const merged = buildMergedCanvas();
+      document.getElementById('confirmPreview').src = merged.toDataURL('image/jpeg', 0.7);
+      document.getElementById('confirmOverlay').classList.add('active');
+    });
+
+    // ── Confirmation: Cancel ───────────────────────────────
+    document.getElementById('confirmNo').addEventListener('click', () => {
+      document.getElementById('confirmOverlay').classList.remove('active');
+    });
+
+    // ── Close overlay on outside click ────────────────────
+    document.getElementById('confirmOverlay').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('confirmOverlay')) {
+        document.getElementById('confirmOverlay').classList.remove('active');
+      }
+    });
+
+    // ── Confirmation: Yes, submit! ─────────────────────────
+    document.getElementById('confirmYes').addEventListener('click', async () => {
+      const overlay = document.getElementById('confirmOverlay');
+      const status = document.getElementById('submitStatus');
+      const name = document.getElementById('displayName').value.trim() || 'Anonymous';
+
+      overlay.classList.remove('active');
+      status.textContent = 'Submitting...';
+      document.getElementById('submitDrawing').disabled = true;
+
+      const merged = buildMergedCanvas();
+      const merged = buildMergedCanvas();
+      merged.id = 'merged-canvas';
+      document.body.appendChild(merged);
+
+      const result = await submitDrawing('merged-canvas', name);
+      document.body.removeChild(merged);
+
+      if (result.success) {
+        status.textContent = '✅ Crime submitted!';
+        markAsSubmitted();
+        loadGallery();
+        setTimeout(() => { status.textContent = ''; }, 3000);
+      } else {
+        status.textContent = '❌ Something went wrong. Try again.';
+        document.getElementById('submitDrawing').disabled = false;
+      }
+    });
+
   </script>
 </body>
 </html>
