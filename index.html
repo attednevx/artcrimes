@@ -17,12 +17,8 @@
       font-weight: bold;
       color: #7b60fa;
     }
-    body.dark .next-topic-timer {
-      color: #aaa;
-    }
-    body.dark .next-topic-timer span {
-      color: #a98fff;
-    }
+    body.dark .next-topic-timer { color: #aaa; }
+    body.dark .next-topic-timer span { color: #a98fff; }
 
     /* === CONFIRMATION POPUP === */
     .confirm-overlay {
@@ -34,9 +30,7 @@
       align-items: center;
       justify-content: center;
     }
-    .confirm-overlay.active {
-      display: flex;
-    }
+    .confirm-overlay.active { display: flex; }
     .confirm-box {
       background: #fff;
       border-radius: 16px;
@@ -46,14 +40,8 @@
       box-shadow: 0 8px 40px rgba(0,0,0,0.22);
       text-align: center;
     }
-    body.dark .confirm-box {
-      background: #1e1e2e;
-      color: #eee;
-    }
-    .confirm-box h3 {
-      font-size: 1.25rem;
-      margin: 0 0 10px 0;
-    }
+    body.dark .confirm-box { background: #1e1e2e; color: #eee; }
+    .confirm-box h3 { font-size: 1.25rem; margin: 0 0 10px 0; }
     .confirm-preview {
       width: 100%;
       max-height: 180px;
@@ -63,21 +51,14 @@
       margin: 12px 0;
       background: #f7f7f7;
     }
-    body.dark .confirm-preview {
-      border-color: #444;
-      background: #2a2a2a;
-    }
+    body.dark .confirm-preview { border-color: #444; background: #2a2a2a; }
     .confirm-warning {
       font-size: 0.88rem;
       color: #e63946;
       margin: 8px 0 18px 0;
       font-weight: 500;
     }
-    .confirm-btn-row {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-    }
+    .confirm-btn-row { display: flex; gap: 12px; justify-content: center; }
     .confirm-yes {
       background: #e63946;
       color: #fff;
@@ -101,10 +82,7 @@
       cursor: pointer;
       transition: background 0.2s;
     }
-    body.dark .confirm-no {
-      background: #333;
-      color: #eee;
-    }
+    body.dark .confirm-no { background: #333; color: #eee; }
     .confirm-no:hover { background: #ddd; }
 
     /* === SUBMIT SECTION === */
@@ -124,11 +102,7 @@
       transition: border 0.2s;
     }
     .name-input:focus { border-color: #7b60fa; }
-    body.dark .name-input {
-      background: #2a2a2a;
-      color: #fff;
-      border-color: #555;
-    }
+    body.dark .name-input { background: #2a2a2a; color: #fff; border-color: #555; }
     .submit-btn {
       background: #e63946;
       color: #fff;
@@ -141,32 +115,14 @@
       transition: background 0.2s;
     }
     .submit-btn:hover { background: #c1121f; }
-    .submit-btn:disabled {
-      background: #aaa;
-      cursor: not-allowed;
-    }
-    .submit-status {
-      font-size: 0.95rem;
-      color: #7b60fa;
-      font-weight: bold;
-    }
-    .already-submitted-msg {
-      font-size: 0.92rem;
-      color: #888;
-      margin-top: 4px;
-    }
+    .submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+    .submit-status { font-size: 0.95rem; color: #7b60fa; font-weight: bold; }
+    .already-submitted-msg { font-size: 0.92rem; color: #888; margin-top: 4px; }
     body.dark .already-submitted-msg { color: #aaa; }
 
     /* === GALLERY === */
-    .gallery-section {
-      margin: 32px 0 16px 0;
-      width: 100%;
-    }
-    .gallery-title {
-      font-size: 1.4rem;
-      font-weight: bold;
-      margin-bottom: 16px;
-    }
+    .gallery-section { margin: 32px 0 16px 0; width: 100%; }
+    .gallery-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 16px; }
     .gallery-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -199,6 +155,36 @@
     }
     body.dark .gallery-card { background: #2a2a2a; }
     body.dark .gallery-card-info { color: #aaa; }
+
+    /* === REACTION BUTTONS === */
+    .gallery-card-reactions {
+      display: flex;
+      gap: 6px;
+      padding: 6px 10px 10px 10px;
+      border-top: 1px solid #f0f0f0;
+    }
+    body.dark .gallery-card-reactions { border-top-color: #333; }
+    .reaction-btn {
+      flex: 1;
+      background: #f5f5f5;
+      border: none;
+      border-radius: 6px;
+      padding: 5px 4px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+    .reaction-btn:hover { background: #ebebeb; transform: scale(1.08); }
+    .reaction-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    body.dark .reaction-btn { background: #333; color: #eee; }
+    body.dark .reaction-btn:hover { background: #444; }
+    .report-btn { flex: 0 0 auto; padding: 5px 8px; }
+    .report-btn:hover { background: #ffeaea; }
+    body.dark .report-btn:hover { background: #4a2020; }
   </style>
 </head>
 <body>
@@ -445,7 +431,7 @@
     </div>
     <div class="footer-contact-row">
       <span class="footer-contact-label">Contact:</span>
-      <a href="mailto:artcrimesgame@gmail.com" class="popup-email-link">artcrimesgame@gmail.com</a>
+      <a href="mailto:artcrimesgame@gmail.com" class="footer-email-link">artcrimesgame@gmail.com</a>
       <span class="footer-contact-sep">|</span>
       <span class="footer-feedback-label">Feedback/Suggestion:</span>
       <a href="mailto:artcrimesfeedback@gmail.com" class="footer-email-link">artcrimesfeedback@gmail.com</a>
@@ -456,11 +442,10 @@
   </footer>
   <!-- === END SITE FOOTER === -->
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
   <script src="theme/theme.js"></script>
   <script src="draw.js"></script>
 
-  <!-- MODULE 1: Topic + Timer + localStorage. Fully independent, no Supabase. -->
+  <!-- MODULE 1: Topic + Timer + localStorage. No Supabase. -->
   <script type="module">
     import { getTodaysTheme } from './themes.js';
 
@@ -511,9 +496,9 @@
     };
   </script>
 
-  <!-- MODULE 2: Gallery + Submit. Supabase-dependent, won't block Module 1. -->
+  <!-- MODULE 2: Gallery + Submit + Reactions. Supabase-dependent. -->
   <script type="module">
-    import { submitDrawing, getTodaysSubmissions } from './gallery.js';
+    import { submitDrawing, getTodaysSubmissions, likeSubmission, funnySubmission, reportSubmission } from './gallery.js';
 
     function buildMergedCanvas() {
       const bgCanvas = document.getElementById('bg-canvas');
@@ -543,13 +528,41 @@
       }
       grid.innerHTML = submissions.map(s => {
         const rot = (Math.random() * 4 - 2).toFixed(2);
-        return '<div class="gallery-card" style="--rot: ' + rot + 'deg">'
-          + '<img src="' + s.image_url + '" alt="Submission by ' + s.display_name + '" loading="lazy"/>'
+        return '<div class="gallery-card" style="--rot: ' + rot + 'deg" data-id="' + s.id + '">'
+          + '<img src="' + s.image_url + '" alt="Submission by ' + (s.display_name || 'Anonymous') + '" loading="lazy"/>'
           + '<div class="gallery-card-info">'
           + '<span>🎨 ' + (s.display_name || 'Anonymous') + '</span>'
           + '<span>' + timeAgo(s.created_at) + '</span>'
-          + '</div></div>';
+          + '</div>'
+          + '<div class="gallery-card-reactions">'
+          + '<button class="reaction-btn like-btn" data-id="' + s.id + '">👍 <span>' + (s.likes || 0) + '</span></button>'
+          + '<button class="reaction-btn funny-btn" data-id="' + s.id + '">😂 <span>' + (s.funny || 0) + '</span></button>'
+          + '<button class="reaction-btn report-btn" data-id="' + s.id + '" title="Report as inappropriate">🚩</button>'
+          + '</div>'
+          + '</div>';
       }).join('');
+
+      grid.querySelectorAll('.like-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const ok = await likeSubmission(btn.dataset.id);
+          if (ok) { btn.querySelector('span').textContent = parseInt(btn.querySelector('span').textContent) + 1; btn.disabled = true; }
+        });
+      });
+
+      grid.querySelectorAll('.funny-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const ok = await funnySubmission(btn.dataset.id);
+          if (ok) { btn.querySelector('span').textContent = parseInt(btn.querySelector('span').textContent) + 1; btn.disabled = true; }
+        });
+      });
+
+      grid.querySelectorAll('.report-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Report this drawing as inappropriate?')) return;
+          const ok = await reportSubmission(btn.dataset.id);
+          if (ok) btn.closest('.gallery-card').remove();
+        });
+      });
     }
 
     async function loadGallery() {
