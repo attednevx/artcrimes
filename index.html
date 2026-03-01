@@ -5,6 +5,201 @@
   <title>Art Crimes</title>
   <link rel="stylesheet" href="draw.css">
   <link rel="icon" type="image/png" href="/logos/artcrimes-favicon.png">
+  <style>
+    /* === COUNTDOWN TIMER === */
+    .next-topic-timer {
+      font-size: 0.95rem;
+      color: #888;
+      margin: 4px 0 18px 0;
+      letter-spacing: 0.01em;
+    }
+    .next-topic-timer span {
+      font-weight: bold;
+      color: #7b60fa;
+    }
+    body.dark .next-topic-timer {
+      color: #aaa;
+    }
+    body.dark .next-topic-timer span {
+      color: #a98fff;
+    }
+
+    /* === CONFIRMATION POPUP === */
+    .confirm-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+    .confirm-overlay.active {
+      display: flex;
+    }
+    .confirm-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px 28px 24px 28px;
+      max-width: 380px;
+      width: 90%;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.22);
+      text-align: center;
+    }
+    body.dark .confirm-box {
+      background: #1e1e2e;
+      color: #eee;
+    }
+    .confirm-box h3 {
+      font-size: 1.25rem;
+      margin: 0 0 10px 0;
+    }
+    .confirm-preview {
+      width: 100%;
+      max-height: 180px;
+      object-fit: contain;
+      border-radius: 10px;
+      border: 2px solid #eee;
+      margin: 12px 0;
+      background: #f7f7f7;
+    }
+    body.dark .confirm-preview {
+      border-color: #444;
+      background: #2a2a2a;
+    }
+    .confirm-warning {
+      font-size: 0.88rem;
+      color: #e63946;
+      margin: 8px 0 18px 0;
+      font-weight: 500;
+    }
+    .confirm-btn-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .confirm-yes {
+      background: #e63946;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 28px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .confirm-yes:hover { background: #c1121f; }
+    .confirm-no {
+      background: #eee;
+      color: #333;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 28px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    body.dark .confirm-no {
+      background: #333;
+      color: #eee;
+    }
+    .confirm-no:hover { background: #ddd; }
+
+    /* === SUBMIT SECTION === */
+    .submit-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 18px 0 10px 0;
+      flex-wrap: wrap;
+    }
+    .name-input {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 2px solid #bbb;
+      font-size: 1rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .name-input:focus { border-color: #7b60fa; }
+    body.dark .name-input {
+      background: #2a2a2a;
+      color: #fff;
+      border-color: #555;
+    }
+    .submit-btn {
+      background: #e63946;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 22px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .submit-btn:hover { background: #c1121f; }
+    .submit-btn:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+    .submit-status {
+      font-size: 0.95rem;
+      color: #7b60fa;
+      font-weight: bold;
+    }
+    .already-submitted-msg {
+      font-size: 0.92rem;
+      color: #888;
+      margin-top: 4px;
+    }
+    body.dark .already-submitted-msg { color: #aaa; }
+
+    /* === GALLERY === */
+    .gallery-section {
+      margin: 32px 0 16px 0;
+      width: 100%;
+    }
+    .gallery-title {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-bottom: 16px;
+    }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 18px;
+    }
+    .gallery-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+      overflow: hidden;
+      transform: rotate(var(--rot));
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .gallery-card:hover {
+      transform: rotate(0deg) scale(1.03);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+    }
+    .gallery-card img {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      display: block;
+    }
+    .gallery-card-info {
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      color: #555;
+      display: flex;
+      justify-content: space-between;
+    }
+    body.dark .gallery-card { background: #2a2a2a; }
+    body.dark .gallery-card-info { color: #aaa; }
+  </style>
 </head>
 <body>
   <button class="theme-toggle-btn" id="toggleDark" title="Toggle theme">🌙</button>
@@ -55,7 +250,7 @@
       </div>
       <div class="popup-contact-row">
         <span class="popup-contact-label">Contact:</span>
-        <a href="/cdn-cgi/l/email-protection#a0c1d2d4c3d2c9cdc5d3c7c1cdc5e0c7cdc1c9cc8ec3cfcd" class="popup-email-link"><span class="__cf_email__" data-cfemail="7a1b080e190813171f091d1b171f3a1d171b131654191517">[email&#160;protected]</span></a>
+        <a href="/cdn-cgi/l/email-protection#90f1e2e4f3e2f9fdf5e3f7f1fdf5d0f7fdf1f9fcbef3fffd" class="popup-email-link"><span class="__cf_email__" data-cfemail="d8b9aaacbbaab1b5bdabbfb9b5bd98bfb5b9b1b4f6bbb7b5">[email&#160;protected]</span></a>
       </div>
       <div class="popup-disclaimer">
         This website is free to use, at your own risk, and does not collect any personal data.
@@ -250,10 +445,10 @@
     </div>
     <div class="footer-contact-row">
       <span class="footer-contact-label">Contact:</span>
-      <a href="/cdn-cgi/l/email-protection#3455464057465d59514753555951745359555d581a575b59" class="footer-email-link"><span class="__cf_email__" data-cfemail="3253404651405b5f574155535f5772555f535b5e1c515d5f">[email&#160;protected]</span></a>
+      <a href="/cdn-cgi/l/email-protection#68091a1c0b1a01050d1b0f09050d280f05090104460b0705" class="footer-email-link"><span class="__cf_email__" data-cfemail="6607141205140f0b031501070b0326010b070f0a4805090b">[email&#160;protected]</span></a>
       <span class="footer-contact-sep">|</span>
       <span class="footer-feedback-label">Feedback/Suggestion:</span>
-      <a href="/cdn-cgi/l/email-protection#d3b2a1a7b0a1babeb6a0b5b6b6b7b1b2b0b893b4beb2babffdb0bcbe" class="footer-email-link"><span class="__cf_email__" data-cfemail="1273606671607b7f7761747777767073717952757f737b7e3c717d7f">[email&#160;protected]</span></a>
+      <a href="/cdn-cgi/l/email-protection#3554474156475c585046535050515754565e755258545c591b565a58" class="footer-email-link"><span class="__cf_email__" data-cfemail="f293808691809b9f97819497979690939199b2959f939b9edc919d9f">[email&#160;protected]</span></a>
     </div>
     <div class="footer-branding-row">
       <span class="footer-copyright">© 2025 Art Crimes. All rights reserved.</span>
@@ -270,12 +465,18 @@
     const today = new Date().toISOString().slice(0, 10);
 
     // ── Topic ──────────────────────────────────────────────
-    window.addEventListener('DOMContentLoaded', () => {
+    function init() {
       document.getElementById('word').textContent = getTodaysTheme();
       checkAlreadySubmitted();
       loadGallery();
       startCountdown();
-    });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
 
     // ── Countdown to midnight (local time) ────────────────
     function startCountdown() {
@@ -388,24 +589,4 @@
       document.getElementById('submitDrawing').disabled = true;
 
       const merged = buildMergedCanvas();
-      const merged = buildMergedCanvas();
-      merged.id = 'merged-canvas';
-      document.body.appendChild(merged);
-
-      const result = await submitDrawing('merged-canvas', name);
-      document.body.removeChild(merged);
-
-      if (result.success) {
-        status.textContent = '✅ Crime submitted!';
-        markAsSubmitted();
-        loadGallery();
-        setTimeout(() => { status.textContent = ''; }, 3000);
-      } else {
-        status.textContent = '❌ Something went wrong. Try again.';
-        document.getElementById('submitDrawing').disabled = false;
-      }
-    });
-
-  </script>
-</body>
-</html>
+      merged.id = 'merged-c
