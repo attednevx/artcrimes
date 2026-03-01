@@ -1,5 +1,5 @@
 export const themes = [
-  { date: "2026-28-02", theme: "Summer" },
+  { date: "2026-02-28", theme: "Summer" },
   { date: "2026-03-02", theme: "Rain" },
   { date: "2026-03-03", theme: "Forest" },
   { date: "2026-03-04", theme: "City" },
@@ -144,4 +144,5 @@ export function getTodaysTheme() {
   const found = themes.find(t => t.date === today);
   return found ? found.theme : "No topic for today!";
 }
+
 
