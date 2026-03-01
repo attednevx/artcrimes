@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Art Crimes — Admin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #0f0f1a; color: #eee; min-height: 100vh; }
+
+    /* === LOGIN === */
+    #loginScreen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .login-box {
+      background: #1e1e2e;
+      border-radius: 14px;
+      padding: 40px 36px;
+      text-align: center;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+      width: 320px;
+    }
+    .login-box h2 { margin-bottom: 6px; font-size: 1.4rem; }
+    .login-box p { color: #888; font-size: 0.9rem; margin-bottom: 24px; }
+    .login-box input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 2px solid #333;
+      background: #0f0f1a;
+      color: #eee;
+      font-size: 1rem;
+      margin-bottom: 14px;
+      outline: none;
+    }
+    .login-box input:focus { border-color: #7b60fa; }
+    .login-box button {
+      width: 100%;
+      padding: 10px;
+      background: #7b60fa;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .login-box button:hover { background: #6348e0; }
+    .login-error { color: #e63946; font-size: 0.88rem; margin-top: 10px; }
+
+    /* === ADMIN PANEL === */
+    #adminPanel { display: none; padding: 30px 24px; max-width: 1200px; margin: 0 auto; }
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .admin-header h1 { font-size: 1.5rem; }
+    .admin-tabs { display: flex; gap: 8px; }
+    .tab-btn {
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: bold;
+      background: #2a2a3e;
+      color: #aaa;
+      transition: background 0.2s;
+    }
+    .tab-btn.active { background: #7b60fa; color: #fff; }
+    .logout-btn {
+      padding: 8px 16px;
+      background: #333;
+      color: #aaa;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.88rem;
+    }
+    .logout-btn:hover { background: #444; color: #eee; }
+
+    /* === GRID === */
+    .admin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 18px;
+    }
+    .admin-card {
+      background: #1e1e2e;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+    .admin-card.reported { border: 2px solid #e63946; }
+    .admin-card img {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      display: block;
+    }
+    .admin-card-info {
+      padding: 8px 12px 4px 12px;
+      font-size: 0.82rem;
+      color: #aaa;
+      display: flex;
+      justify-content: space-between;
+    }
+    .admin-card-actions {
+      display: flex;
+      gap: 6px;
+      padding: 6px 10px 10px 10px;
+    }
+    .admin-btn {
+      flex: 1;
+      padding: 6px 4px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .delete-btn { background: #e63946; color: #fff; }
+    .delete-btn:hover { background: #c1121f; }
+    .restore-btn { background: #2ecc71; color: #fff; }
+    .restore-btn:hover { background: #27ae60; }
+    .reported-badge {
+      background: #e63946;
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .stats-bar {
+      background: #1e1e2e;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+    }
+    .stats-bar span { color: #aaa; }
+    .stats-bar b { color: #eee; }
+    .loading { color: #888; text-align: center; padding: 40px; }
+    .date-filter {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .date-filter label { color: #aaa; font-size: 0.9rem; }
+    .date-filter input {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 2px solid #333;
+      background: #0f0f1a;
+      color: #eee;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .date-filter input:focus { border-color: #7b60fa; }
+    .date-filter button {
+      padding: 6px 14px;
+      background: #7b60fa;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.88rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- === LOGIN SCREEN === -->
+  <div id="loginScreen">
+    <div class="login-box">
+      <h2>🚨 Art Crimes</h2>
+      <p>Admin access only</p>
+      <input type="password" id="passwordInput" placeholder="Enter password" />
+      <button onclick="tryLogin()">Enter</button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- === ADMIN PANEL === -->
+  <div id="adminPanel">
+    <div class="admin-header">
+      <h1>🚨 Art Crimes Admin</h1>
+      <div class="admin-tabs">
+        <button class="tab-btn active" onclick="showTab('all')">All Submissions</button>
+        <button class="tab-btn" onclick="showTab('reported')">Reported 🚩</button>
+      </div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="stats-bar" id="statsBar">Loading...</div>
+
+    <div class="date-filter">
+      <label>Filter by date:</label>
+      <input type="date" id="dateFilter" />
+      <button onclick="loadSubmissions()">Filter</button>
+      <button onclick="document.getElementById('dateFilter').value=''; loadSubmissions();" style="background:#333; color:#aaa;">Clear</button>
+    </div>
+
+    <div class="admin-grid" id="adminGrid">
+      <div class="loading">Loading submissions...</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { getAllSubmissions, deleteSubmission, restoreSubmission } from './gallery.js';
+
+    // ── PASSWORD ──────────────────────────────────────────
+    const ADMIN_PASSWORD = 'armin123';
+
+    window.tryLogin = function() {
+      const input = document.getElementById('passwordInput').value;
+      if (input === ADMIN_PASSWORD) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+        loadSubmissions();
+      } else {
+        document.getElementById('loginError').textContent = 'Wrong password.';
+      }
+    };
+
+    // Allow pressing Enter to login
+    document.getElementById('passwordInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') window.tryLogin();
+    });
+
+    window.logout = function() {
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('adminPanel').style.display = 'none';
+      document.getElementById('passwordInput').value = '';
+    };
+
+    // ── TABS ──────────────────────────────────────────────
+    let currentTab = 'all';
+    window.showTab = function(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      renderGrid(window._allSubmissions || []);
+    };
+
+    // ── LOAD ──────────────────────────────────────────────
+    window.loadSubmissions = async function() {
+      document.getElementById('adminGrid').innerHTML = '<div class="loading">Loading...</div>';
+      const all = await getAllSubmissions();
+      window._allSubmissions = all;
+      updateStats(all);
+      renderGrid(all);
+    };
+
+    function updateStats(all) {
+      const reported = all.filter(s => s.reported).length;
+      const today = new Date().toISOString().slice(0, 10);
+      const todayCount = all.filter(s => s.topic_date === today).length;
+      document.getElementById('statsBar').innerHTML =
+        '<span>Total: <b>' + all.length + '</b></span>'
+        + '<span>Today: <b>' + todayCount + '</b></span>'
+        + '<span>Reported: <b style="color:#e63946">' + reported + '</b></span>';
+    }
+
+    function renderGrid(all) {
+      const dateFilter = document.getElementById('dateFilter').value;
+      let items = all;
+      if (dateFilter) items = items.filter(s => s.topic_date === dateFilter);
+      if (currentTab === 'reported') items = items.filter(s => s.reported);
+
+      const grid = document.getElementById('adminGrid');
+      if (!items.length) {
+        grid.innerHTML = '<div class="loading">No submissions found.</div>';
+        return;
+      }
+
+      grid.innerHTML = items.map(s => {
+        const date = new Date(s.created_at).toLocaleString();
+        return '<div class="admin-card' + (s.reported ? ' reported' : '') + '" id="card-' + s.id + '">'
+          + '<img src="' + s.image_url + '" loading="lazy"/>'
+          + '<div class="admin-card-info">'
+          + '<span>🎨 ' + (s.display_name || 'Anonymous') + '</span>'
+          + (s.reported ? '<span class="reported-badge">REPORTED</span>' : '')
+          + '</div>'
+          + '<div class="admin-card-info" style="padding-top:0">'
+          + '<span>' + s.topic_date + '</span>'
+          + '<span>👍' + (s.likes||0) + ' 😂' + (s.funny||0) + '</span>'
+          + '</div>'
+          + '<div class="admin-card-actions">'
+          + (s.reported ? '<button class="admin-btn restore-btn" onclick="restore(\'' + s.id + '\')">✅ Restore</button>' : '')
+          + '<button class="admin-btn delete-btn" onclick="remove(\'' + s.id + '\', \'' + s.image_url + '\')">🗑 Delete</button>'
+          + '</div>'
+          + '</div>';
+      }).join('');
+    }
+
+    // ── ACTIONS ───────────────────────────────────────────
+    window.remove = async function(id, imageUrl) {
+      if (!confirm('Permanently delete this submission?')) return;
+      const ok = await deleteSubmission(id, imageUrl);
+      if (ok) {
+        document.getElementById('card-' + id).remove();
+        window._allSubmissions = window._allSubmissions.filter(s => s.id !== id);
+        updateStats(window._allSubmissions);
+      } else {
+        alert('Delete failed. Check console.');
+      }
+    };
+
+    window.restore = async function(id) {
+      const ok = await restoreSubmission(id);
+      if (ok) {
+        window._allSubmissions = window._allSubmissions.map(s =>
+          s.id === id ? { ...s, reported: false } : s
+        );
+        renderGrid(window._allSubmissions);
+        updateStats(window._allSubmissions);
+      }
+    };
+  </script>
+</body>
+</html>
