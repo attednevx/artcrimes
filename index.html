@@ -456,29 +456,28 @@
   </footer>
   <!-- === END SITE FOOTER === -->
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="theme/theme.js"></script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+  <script src="theme/theme.js"></script>
   <script src="draw.js"></script>
+
+  <!-- MODULE 1: Topic + Timer + localStorage. Fully independent, no Supabase. -->
   <script type="module">
     import { getTodaysTheme } from './themes.js';
-    import { submitDrawing, getTodaysSubmissions } from './gallery.js';
 
     const today = new Date().toISOString().slice(0, 10);
 
-    // ── Topic ──────────────────────────────────────────────
-    function init() {
+    function initCore() {
       document.getElementById('word').textContent = getTodaysTheme();
-      checkAlreadySubmitted();
-      loadGallery();
       startCountdown();
+      checkAlreadySubmitted();
     }
 
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
+      document.addEventListener('DOMContentLoaded', initCore);
     } else {
-      init();
+      initCore();
     }
 
-    // ── Countdown to midnight (local time) ────────────────
     function startCountdown() {
       function update() {
         const now = new Date();
@@ -488,13 +487,12 @@
         const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
         const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
         const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
-        document.getElementById('countdown').textContent = `${h}:${m}:${s}`;
+        document.getElementById('countdown').textContent = h + ':' + m + ':' + s;
       }
       update();
       setInterval(update, 1000);
     }
 
-    // ── Daily submit limit via localStorage ───────────────
     function checkAlreadySubmitted() {
       if (localStorage.getItem('artcrimes_submitted') === today) {
         lockSubmitButton();
@@ -507,46 +505,16 @@
       document.getElementById('alreadySubmittedMsg').style.display = 'block';
     }
 
-    function markAsSubmitted() {
+    window._markAsSubmitted = function() {
       localStorage.setItem('artcrimes_submitted', today);
       lockSubmitButton();
-    }
+    };
+  </script>
 
-    // ── Gallery ────────────────────────────────────────────
-    function timeAgo(dateStr) {
-      const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
-      if (diff < 60) return `${diff}s ago`;
-      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-      return `${Math.floor(diff / 86400)}d ago`;
-    }
+  <!-- MODULE 2: Gallery + Submit. Supabase-dependent, won't block Module 1. -->
+  <script type="module">
+    import { submitDrawing, getTodaysSubmissions } from './gallery.js';
 
-    function renderGallery(submissions) {
-      const grid = document.getElementById('gallery');
-      if (!submissions.length) {
-        grid.innerHTML = '<p style="color:#aaa; grid-column:1/-1;">No submissions yet today. Be the first! 🎨</p>';
-        return;
-      }
-      grid.innerHTML = submissions.map(s => {
-        const rot = (Math.random() * 4 - 2).toFixed(2);
-        return `
-          <div class="gallery-card" style="--rot: ${rot}deg">
-            <img src="${s.image_url}" alt="Submission by ${s.display_name}" loading="lazy"/>
-            <div class="gallery-card-info">
-              <span>🎨 ${s.display_name || 'Anonymous'}</span>
-              <span>${timeAgo(s.created_at)}</span>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    async function loadGallery() {
-      const submissions = await getTodaysSubmissions();
-      renderGallery(submissions);
-    }
-
-    // ── Merge canvases helper ──────────────────────────────
     function buildMergedCanvas() {
       const bgCanvas = document.getElementById('bg-canvas');
       const drawCanvas = document.getElementById('draw-canvas');
@@ -559,54 +527,92 @@
       return merged;
     }
 
-    // ── Submit button → show confirmation popup ────────────
-    document.getElementById('submitDrawing').addEventListener('click', () => {
-      const merged = buildMergedCanvas();
-      document.getElementById('confirmPreview').src = merged.toDataURL('image/jpeg', 0.7);
-      document.getElementById('confirmOverlay').classList.add('active');
-    });
+    function timeAgo(dateStr) {
+      const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+      if (diff < 60) return diff + 's ago';
+      if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+      if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+      return Math.floor(diff / 86400) + 'd ago';
+    }
 
-    // ── Confirmation: Cancel ───────────────────────────────
-    document.getElementById('confirmNo').addEventListener('click', () => {
-      document.getElementById('confirmOverlay').classList.remove('active');
-    });
+    function renderGallery(submissions) {
+      const grid = document.getElementById('gallery');
+      if (!submissions.length) {
+        grid.innerHTML = '<p style="color:#aaa; grid-column:1/-1;">No submissions yet today. Be the first! 🎨</p>';
+        return;
+      }
+      grid.innerHTML = submissions.map(s => {
+        const rot = (Math.random() * 4 - 2).toFixed(2);
+        return '<div class="gallery-card" style="--rot: ' + rot + 'deg">'
+          + '<img src="' + s.image_url + '" alt="Submission by ' + s.display_name + '" loading="lazy"/>'
+          + '<div class="gallery-card-info">'
+          + '<span>🎨 ' + (s.display_name || 'Anonymous') + '</span>'
+          + '<span>' + timeAgo(s.created_at) + '</span>'
+          + '</div></div>';
+      }).join('');
+    }
 
-    // ── Close overlay on outside click ────────────────────
-    document.getElementById('confirmOverlay').addEventListener('click', (e) => {
-      if (e.target === document.getElementById('confirmOverlay')) {
+    async function loadGallery() {
+      try {
+        const submissions = await getTodaysSubmissions();
+        renderGallery(submissions);
+      } catch(e) {
+        console.error('Gallery load failed:', e);
+      }
+    }
+
+    function initGallery() {
+      loadGallery();
+
+      document.getElementById('submitDrawing').addEventListener('click', () => {
+        const merged = buildMergedCanvas();
+        document.getElementById('confirmPreview').src = merged.toDataURL('image/jpeg', 0.7);
+        document.getElementById('confirmOverlay').classList.add('active');
+      });
+
+      document.getElementById('confirmNo').addEventListener('click', () => {
         document.getElementById('confirmOverlay').classList.remove('active');
-      }
-    });
+      });
 
-    // ── Confirmation: Yes, submit! ─────────────────────────
-    document.getElementById('confirmYes').addEventListener('click', async () => {
-      const overlay = document.getElementById('confirmOverlay');
-      const status = document.getElementById('submitStatus');
-      const name = document.getElementById('displayName').value.trim() || 'Anonymous';
+      document.getElementById('confirmOverlay').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('confirmOverlay')) {
+          document.getElementById('confirmOverlay').classList.remove('active');
+        }
+      });
 
-      overlay.classList.remove('active');
-      status.textContent = 'Submitting...';
-      document.getElementById('submitDrawing').disabled = true;
+      document.getElementById('confirmYes').addEventListener('click', async () => {
+        const overlay = document.getElementById('confirmOverlay');
+        const status = document.getElementById('submitStatus');
+        const name = document.getElementById('displayName').value.trim() || 'Anonymous';
 
-      const merged = buildMergedCanvas();
-      const merged = buildMergedCanvas();
-      merged.id = 'merged-canvas';
-      document.body.appendChild(merged);
+        overlay.classList.remove('active');
+        status.textContent = 'Submitting...';
+        document.getElementById('submitDrawing').disabled = true;
 
-      const result = await submitDrawing('merged-canvas', name);
-      document.body.removeChild(merged);
+        const merged = buildMergedCanvas();
+        merged.id = 'merged-canvas';
+        document.body.appendChild(merged);
 
-      if (result.success) {
-        status.textContent = '✅ Crime submitted!';
-        markAsSubmitted();
-        loadGallery();
-        setTimeout(() => { status.textContent = ''; }, 3000);
-      } else {
-        status.textContent = '❌ Something went wrong. Try again.';
-        document.getElementById('submitDrawing').disabled = false;
-      }
-    });
+        const result = await submitDrawing('merged-canvas', name);
+        document.body.removeChild(merged);
 
+        if (result.success) {
+          status.textContent = '✅ Crime submitted!';
+          if (window._markAsSubmitted) window._markAsSubmitted();
+          loadGallery();
+          setTimeout(() => { status.textContent = ''; }, 3000);
+        } else {
+          status.textContent = '❌ Something went wrong. Try again.';
+          document.getElementById('submitDrawing').disabled = false;
+        }
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initGallery);
+    } else {
+      initGallery();
+    }
   </script>
 </body>
 </html>
