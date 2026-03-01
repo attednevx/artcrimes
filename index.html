@@ -589,4 +589,24 @@
       document.getElementById('submitDrawing').disabled = true;
 
       const merged = buildMergedCanvas();
-      merged.id = 'merged-c
+      const merged = buildMergedCanvas();
+      merged.id = 'merged-canvas';
+      document.body.appendChild(merged);
+
+      const result = await submitDrawing('merged-canvas', name);
+      document.body.removeChild(merged);
+
+      if (result.success) {
+        status.textContent = '✅ Crime submitted!';
+        markAsSubmitted();
+        loadGallery();
+        setTimeout(() => { status.textContent = ''; }, 3000);
+      } else {
+        status.textContent = '❌ Something went wrong. Try again.';
+        document.getElementById('submitDrawing').disabled = false;
+      }
+    });
+
+  </script>
+</body>
+</html>
