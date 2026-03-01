@@ -69,9 +69,9 @@ export async function likeSubmission(id) {
   return !error
 }
 
-// Funny a submission
-export async function funnySubmission(id) {
-  const { error } = await supabase.rpc('increment_funny', { row_id: id })
+// Dislike a submission
+export async function dislikeSubmission(id) {
+  const { error } = await supabase.rpc('increment_dislikes', { row_id: id })
   if (error) console.error('Funny error:', error)
   return !error
 }
