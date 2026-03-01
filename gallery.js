@@ -42,7 +42,7 @@ export async function submitDrawing(canvasId, displayName = 'Anonymous') {
   return { success: true, url: publicUrl }
 }
 
-// Fetch today's submissions (last 20, skip reported)
+// Fetch today's submissions (last 20)
 export async function getTodaysSubmissions() {
   const today = new Date().toISOString().slice(0, 10)
   
@@ -50,7 +50,6 @@ export async function getTodaysSubmissions() {
     .from('submissions')
     .select('*')
     .eq('topic_date', today)
-    .eq('reported', false)
     .order('created_at', { ascending: false })
     .limit(20)
 
