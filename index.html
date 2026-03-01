@@ -288,7 +288,6 @@
       <button id="closeInfoPopup" class="popup-close-btn">Close</button>
     </div>
   </div>
-  <!-- === END POPUP MODAL === -->
 
   <!-- === CONFIRMATION POPUP === -->
   <div class="confirm-overlay" id="confirmOverlay">
@@ -304,12 +303,10 @@
       </div>
     </div>
   </div>
-  <!-- === END CONFIRMATION POPUP === -->
 
   <div class="container">
     <h1 style="margin-top:36px;">Today's topic: <span id="word">...</span></h1>
 
-    <!-- === COUNTDOWN TIMER === -->
     <div class="next-topic-timer">
       Next topic in: <span id="countdown">--:--:--</span>
     </div>
@@ -333,7 +330,6 @@
       <span>To move the canvas while zoomed on mobile: use two fingers</span>
     </div>
 
-    <!-- === PALETTE & BACKGROUND BUTTONS === -->
     <div class="color-bg-row">
       <label class="color-picker-label" for="openColorPickerSwatch">Color:</label>
       <button id="openColorPickerSwatch" class="swatch selected-swatch"></button>
@@ -341,7 +337,6 @@
       <button id="openBgPickerSwatch" class="bg-swatch selected-bg-swatch"></button>
     </div>
 
-    <!-- === MODALS FOR PALETTE & BACKGROUND === -->
     <div id="colorPickerModal" class="modal hidden">
       <div class="modal-header">
         <span>Choose Brush Color</span>
@@ -368,7 +363,6 @@
       <label class="grid-checkbox-label"><input type="checkbox" id="gridCheckbox"/> Grid</label>
     </div>
 
-    <!-- ==== TOOLS SECTION ==== -->
     <div class="tools-section">
       <div class="tools-top-row">
         <label class="line-width-label">
@@ -395,7 +389,6 @@
         </label>
       </div>
     </div>
-    <!-- ==== END TOOLS SECTION ==== -->
 
     <div class="controls">
       <button id="share" class="share-btn-main">Share</button>
@@ -433,15 +426,8 @@
 
     <p id="info">Draw your version of the topic above and share your artwork on social media with <b>#ArtCrimesGame</b></p>
 
-    <!-- === SUBMIT SECTION === -->
     <div class="submit-section">
-      <input
-        type="text"
-        id="displayName"
-        placeholder="Your name (optional)"
-        maxlength="24"
-        class="name-input"
-      />
+      <input type="text" id="displayName" placeholder="Your name (optional)" maxlength="24" class="name-input"/>
       <button id="submitDrawing" class="submit-btn">🚨 Submit Crime</button>
       <span id="submitStatus" class="submit-status"></span>
     </div>
@@ -449,7 +435,6 @@
       ✅ You already submitted today's crime. Come back tomorrow for a new topic!
     </div>
 
-    <!-- === GALLERY SECTION === -->
     <div class="gallery-section">
       <h2 class="gallery-title">Today's Crime Scene 🚨</h2>
       <div id="gallery" class="gallery-grid"></div>
@@ -484,12 +469,10 @@
       <span class="footer-copyright">© 2025 Art Crimes. All rights reserved.</span>
     </div>
   </footer>
-  <!-- === END SITE FOOTER === -->
 
   <script src="theme/theme.js"></script>
   <script src="draw.js"></script>
 
-  <!-- MODULE 1: Topic + Timer + localStorage. Nema Supabase, nikad ne blokira. -->
   <script type="module">
     import { getTodaysTheme } from './themes.js';
 
@@ -515,7 +498,7 @@
         const diff = midnight - now;
         const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
         const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-        const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+        const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '00');
         document.getElementById('countdown').textContent = h + ':' + m + ':' + s;
       }
       update();
@@ -540,7 +523,6 @@
     };
   </script>
 
-  <!-- MODULE 2: Gallery + Submit + Reactions. Supabase-dependent. -->
   <script type="module">
     import { submitDrawing, getTodaysSubmissions, likeSubmission, dislikeSubmission, reportSubmission } from './gallery.js';
 
@@ -606,7 +588,11 @@
         btn.addEventListener('click', async () => {
           if (!confirm('Report this drawing as inappropriate?')) return;
           const ok = await reportSubmission(btn.dataset.id);
-          if (ok) btn.closest('.gallery-card').remove();
+          if (ok) {
+            btn.textContent = '✅';
+            btn.disabled = true;
+            btn.title = 'Reported — admin will review';
+          }
         });
       });
     }
