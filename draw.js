@@ -1,25 +1,4 @@
-// ==== INFO POPUP LOGIC ====
-document.addEventListener("DOMContentLoaded", function () {
-  // Prikaži popup kad se stranica učita
-  const infoPopup = document.getElementById('infoPopup');
-  infoPopup.classList.add('active');
-
-  // Zatvori popup na klik
-  const closeBtn = document.getElementById('closeInfoPopup');
-  closeBtn.onclick = function () {
-    infoPopup.classList.remove('active');
-  };
-});
-
-// ==== GET TODAY'S WORD FROM BACKEND ====
-function loadTodaysWord() {
-  fetch('/api/todays-word')
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById('word').textContent = data.word || '...';
-    });
-}
-loadTodaysWord();
+// ==== ART CRIMES - Drawing Engine ====
 
 // ==== PALETTE COLORS ====
 const MAIN_COLORS = [
@@ -68,8 +47,9 @@ function buildPalette(rowElem, colorList, isSpecial=false) {
       lastColor = col.color;
       eraserMode = false;
       fillMode = false;
-      document.getElementById('eraser').classList.remove('active');
+      document.getElementById('eraser').classList.remove('active', 'eraser-active');
       document.getElementById('fill').classList.remove('active');
+      updateSelectedColorSwatch();
     };
     rowElem.appendChild(swatch);
   });
@@ -85,9 +65,10 @@ customColorInput.oninput = (e) => {
   setActiveSwatch(null);
   eraserMode = false;
   fillMode = false;
-  document.getElementById('eraser').classList.remove('active');
+  document.getElementById('eraser').classList.remove('active', 'eraser-active');
   document.getElementById('fill').classList.remove('active');
   document.querySelector('.custom-color-btn').style.background = currentColor;
+  updateSelectedColorSwatch();
 };
 function setActiveSwatch(activeBtn) {
   document.querySelectorAll('.swatch').forEach(btn => btn.classList.remove('active'));
@@ -113,6 +94,7 @@ function buildBgPalette(rowElem, colorList, isSpecial=false) {
       bgType = "color";
       bgColor = col.color;
       drawBgCanvas();
+      updateSelectedBgSwatch();
     };
     rowElem.appendChild(swatch);
   });
@@ -128,6 +110,7 @@ customBgInput.oninput = (e) => {
   setActiveBgSwatch(null);
   document.querySelector('.custom-bg-btn').style.background = customBg;
   drawBgCanvas();
+  updateSelectedBgSwatch();
 };
 function setActiveBgSwatch(activeBtn) {
   document.querySelectorAll('.bg-swatch').forEach(btn => btn.classList.remove('active'));
@@ -154,7 +137,7 @@ ctx.lineCap = 'round';
 
 function drawBgCanvas() {
   // Use theme from body class
-  const isDark = document.body.classList.contains('dark');
+  const isDark = !document.body.classList.contains('light');
   bgCtx.save();
   bgCtx.globalAlpha = 1;
   bgCtx.fillStyle = (bgType === "color") ? bgColor : (bgType === "custom" ? customBg : "#fff");
@@ -184,12 +167,12 @@ const eraserBtn = document.getElementById('eraser');
 eraserBtn.onclick = () => {
   eraserMode = !eraserMode;
   if (eraserMode) {
-    eraserBtn.classList.add('active');
+    eraserBtn.classList.add('active', 'eraser-active');
     setActiveSwatch(null);
     fillMode = false;
     document.getElementById('fill').classList.remove('active');
   } else {
-    eraserBtn.classList.remove('active');
+    eraserBtn.classList.remove('active', 'eraser-active');
     currentColor = lastColor;
   }
 };
@@ -199,8 +182,7 @@ fillBtn.onclick = () => {
   if (fillMode) {
     fillBtn.classList.add('active');
     eraserMode = false;
-    eraserBtn.classList.remove('active');
-    setActiveSwatch && setActiveSwatch(null);
+    eraserBtn.classList.remove('active', 'eraser-active');
   } else {
     fillBtn.classList.remove('active');
   }
@@ -758,15 +740,6 @@ drawCanvas.addEventListener('touchend', function(e) {
   }
 }, { passive: false });
 
-// ==== Theme button sync (with theme.js) ====
-function updateThemeBtn() {
-  const themeBtn = document.getElementById('toggleDark');
-  if (!themeBtn) return;
-  themeBtn.textContent = document.body.classList.contains('dark') ? "☀️" : "🌙";
-}
-document.addEventListener("DOMContentLoaded", updateThemeBtn);
-document.addEventListener("themeChange", updateThemeBtn); // in case theme.js triggers this custom event
-window.setInterval(updateThemeBtn, 1000); // fallback: update icon every second, in case theme changes elsewhere
 
 drawBgCanvas();
 renderAll();
@@ -790,29 +763,13 @@ setupModal('openBgPickerSwatch', 'bgPickerModal', 'closeBgPicker');
 // Update selected color swatch
 function updateSelectedColorSwatch() {
   const swatchBtn = document.getElementById('openColorPickerSwatch');
-  swatchBtn.style.background = currentColor; // koristiš var currentColor iz tvoje logike
+  if (swatchBtn) swatchBtn.style.background = currentColor;
 }
 // Update selected background swatch
 function updateSelectedBgSwatch() {
   const bgSwatchBtn = document.getElementById('openBgPickerSwatch');
-  bgSwatchBtn.style.background = bgType === "color" ? bgColor : customBg;
+  if (bgSwatchBtn) bgSwatchBtn.style.background = bgType === "color" ? bgColor : customBg;
 }
 
-// Otvaranje modala na klik
-document.getElementById('openColorPickerSwatch').onclick = function() {
-  document.getElementById('colorPickerModal').classList.remove('hidden');
-};
-document.getElementById('openBgPickerSwatch').onclick = function() {
-  document.getElementById('bgPickerModal').classList.remove('hidden');
-};
-
-// Pozovi ove funkcije kad god user promijeni boju
-// Dodaj nakon svake promjene boje/backgrounda:
 updateSelectedColorSwatch();
-updateSelectedBgSwatch();
-
-// Primjer: u customColorInput.oninput, u paletama, itd. - dodaj poziv
-// Nakon što user promijeni currentColor:
-updateSelectedColorSwatch();
-// Nakon što user promijeni bgColor/customBg:
 updateSelectedBgSwatch();
