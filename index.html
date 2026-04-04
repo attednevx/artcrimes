@@ -2,301 +2,90 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Art Crimes</title>
-  <link rel="stylesheet" href="draw.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Art Crimes - Draw the Worst Art</title>
+  <meta name="description" content="Art Crimes: Draw today's topic in the ugliest, funniest way possible. Daily drawing challenges for everyone.">
   <link rel="icon" type="image/png" href="/logos/artcrimes-favicon.png">
-  <style>
-    /* === COUNTDOWN TIMER === */
-    .next-topic-timer {
-      font-size: 0.95rem;
-      color: #888;
-      margin: 4px 0 18px 0;
-      letter-spacing: 0.01em;
-    }
-    .next-topic-timer span {
-      font-weight: bold;
-      color: #7b60fa;
-    }
-    body.dark .next-topic-timer {
-      color: #aaa;
-    }
-    body.dark .next-topic-timer span {
-      color: #a98fff;
-    }
-
-    /* === CONFIRMATION POPUP === */
-    .confirm-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.55);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-    }
-    .confirm-overlay.active {
-      display: flex;
-    }
-    .confirm-box {
-      background: #fff;
-      border-radius: 16px;
-      padding: 32px 28px 24px 28px;
-      max-width: 380px;
-      width: 90%;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.22);
-      text-align: center;
-    }
-    body.dark .confirm-box {
-      background: #1e1e2e;
-      color: #eee;
-    }
-    .confirm-box h3 {
-      font-size: 1.25rem;
-      margin: 0 0 10px 0;
-    }
-    .confirm-preview {
-      width: 100%;
-      max-height: 180px;
-      object-fit: contain;
-      border-radius: 10px;
-      border: 2px solid #eee;
-      margin: 12px 0;
-      background: #f7f7f7;
-    }
-    body.dark .confirm-preview {
-      border-color: #444;
-      background: #2a2a2a;
-    }
-    .confirm-warning {
-      font-size: 0.88rem;
-      color: #e63946;
-      margin: 8px 0 18px 0;
-      font-weight: 500;
-    }
-    .confirm-btn-row {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-    }
-    .confirm-yes {
-      background: #e63946;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 28px;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .confirm-yes:hover { background: #c1121f; }
-    .confirm-no {
-      background: #eee;
-      color: #333;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 28px;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    body.dark .confirm-no {
-      background: #333;
-      color: #eee;
-    }
-    .confirm-no:hover { background: #ddd; }
-
-    /* === SUBMIT SECTION === */
-    .submit-section {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 18px 0 10px 0;
-      flex-wrap: wrap;
-    }
-    .name-input {
-      padding: 8px 14px;
-      border-radius: 8px;
-      border: 2px solid #bbb;
-      font-size: 1rem;
-      outline: none;
-      transition: border 0.2s;
-    }
-    .name-input:focus { border-color: #7b60fa; }
-    body.dark .name-input {
-      background: #2a2a2a;
-      color: #fff;
-      border-color: #555;
-    }
-    .submit-btn {
-      background: #e63946;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 9px 22px;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .submit-btn:hover { background: #c1121f; }
-    .submit-btn:disabled {
-      background: #aaa;
-      cursor: not-allowed;
-    }
-    .submit-status {
-      font-size: 0.95rem;
-      color: #7b60fa;
-      font-weight: bold;
-    }
-    .already-submitted-msg {
-      font-size: 0.92rem;
-      color: #888;
-      margin-top: 4px;
-    }
-    body.dark .already-submitted-msg { color: #aaa; }
-
-    /* === GALLERY === */
-    .gallery-section {
-      margin: 32px 0 16px 0;
-      width: 100%;
-    }
-    .gallery-title {
-      font-size: 1.4rem;
-      font-weight: bold;
-      margin-bottom: 16px;
-    }
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 18px;
-    }
-    .gallery-card {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-      overflow: hidden;
-      transform: rotate(var(--rot));
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .gallery-card:hover {
-      transform: rotate(0deg) scale(1.03);
-      box-shadow: 0 6px 24px rgba(0,0,0,0.18);
-    }
-    .gallery-card img {
-      width: 100%;
-      aspect-ratio: 4/3;
-      object-fit: cover;
-      display: block;
-    }
-    .gallery-card-info {
-      padding: 8px 12px;
-      font-size: 0.85rem;
-      color: #555;
-      display: flex;
-      justify-content: space-between;
-    }
-    body.dark .gallery-card { background: #2a2a2a; }
-    body.dark .gallery-card-info { color: #aaa; }
-
-    /* === REACTION BUTTONS === */
-    .gallery-card-reactions {
-      display: flex;
-      gap: 6px;
-      padding: 6px 10px 10px 10px;
-      border-top: 1px solid #f0f0f0;
-    }
-    body.dark .gallery-card-reactions { border-top-color: #333; }
-    .reaction-btn {
-      flex: 1;
-      background: #f5f5f5;
-      border: none;
-      border-radius: 6px;
-      padding: 5px 4px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: background 0.15s, transform 0.1s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-    }
-    .reaction-btn:hover { background: #ebebeb; transform: scale(1.08); }
-    .reaction-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    body.dark .reaction-btn { background: #333; color: #eee; }
-    body.dark .reaction-btn:hover { background: #444; }
-    .report-btn { flex: 0 0 auto; padding: 5px 8px; }
-    .report-btn:hover { background: #ffeaea; }
-    body.dark .report-btn:hover { background: #4a2020; }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Permanent+Marker&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="draw.css">
 </head>
 <body>
-  <button class="theme-toggle-btn" id="toggleDark" title="Toggle theme">🌙</button>
 
-  <!-- === POPUP MODAL === -->
-  <div id="infoPopup" class="info-popup">
-    <div class="info-popup-content">
-      <h2 class="popup-title">Art Crimes</h2>
-      <div class="popup-main-content">
-        <div class="popup-subtitle">How to play:</div>
-        <div class="popup-rules">
-          <div>Draw today's topic in the most funniest, weirdest or ugliest way. Use your limitless imagination.</div>
-          <div>Use color palette, background, eraser, fill and zoom for your art crime.</div>
-          <div>Share your artwork on social media with <b>#ArtCrimesGame</b></div>
-          <div>For the best experience we recommend playing on desktop.</div>
+  <!-- ========== NAVBAR ========== -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a class="nav-brand" href="#">
+        <span class="brand-icon">🎨</span>
+        <span class="brand-text">Art Crimes</span>
+      </a>
+      <div class="nav-tabs">
+        <button class="nav-tab active" data-tab="tab-draw">
+          <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+          Draw
+        </button>
+        <button class="nav-tab" data-tab="tab-gallery">
+          <svg viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
+          Gallery
+        </button>
+        <button class="nav-tab" data-tab="tab-leaderboard">
+          <svg viewBox="0 0 24 24"><path d="M7 4V2H17V4H20C20.55 4 21 4.45 21 5V9C21 10.66 19.66 12 18 12H17.42C16.9 14.77 14.72 16.95 12 17.42V20H16V22H8V20H12V17.42C9.28 16.95 7.1 14.77 6.58 12H6C4.34 12 3 10.66 3 9V5C3 4.45 3.45 4 4 4H7ZM5 6V9C5 9.55 5.45 10 6 10H6.18C6.06 9.36 6 8.69 6 8V6H5ZM19 6H18V8C18 8.69 17.94 9.36 17.82 10H18C18.55 10 19 9.55 19 9V6Z"/></svg>
+          Most Wanted
+        </button>
+        <button class="nav-tab" data-tab="tab-settings">
+          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg>
+          Settings
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ========== WELCOME MODAL ========== -->
+  <div class="welcome-overlay" id="welcomeModal">
+    <div class="welcome-card">
+      <h1 class="welcome-title">Art Crimes</h1>
+      <p class="welcome-subtitle">Draw your worst masterpiece</p>
+      <div class="welcome-rules">
+        <div class="welcome-rule">
+          <span class="welcome-rule-num">1</span>
+          <span>Draw today's topic in the funniest, weirdest, or ugliest way. Use your limitless imagination.</span>
+        </div>
+        <div class="welcome-rule">
+          <span class="welcome-rule-num">2</span>
+          <span>Use the color palette, background, eraser, fill, and zoom tools to create your art crime.</span>
+        </div>
+        <div class="welcome-rule">
+          <span class="welcome-rule-num">3</span>
+          <span>Submit your crime and share it with <b>#ArtCrimesGame</b></span>
+        </div>
+        <div class="welcome-rule">
+          <span class="welcome-rule-num">4</span>
+          <span>For the best experience, we recommend playing on desktop.</span>
         </div>
       </div>
-      <div class="popup-social-row">
-        <span class="popup-social-label">Follow us:</span>
-        <a href="https://reddit.com/r/artcrimes" target="_blank" rel="noopener" class="popup-social-btn" title="Reddit">
-          <svg width="22" height="22" viewBox="0 0 512 512" style="vertical-align: middle;">
-            <circle cx="256" cy="256" r="256" fill="#FF4500"/>
-            <ellipse cx="256" cy="300" rx="115" ry="80" fill="#fff"/>
-            <ellipse cx="205" cy="295" rx="20" ry="20" fill="#FF4500"/>
-            <ellipse cx="307" cy="295" rx="20" ry="20" fill="#FF4500"/>
-            <ellipse cx="256" cy="340" rx="40" ry="18" fill="#fff"/>
-            <path d="M214 224c0-23.2 18.8-42 42-42s42 18.8 42 42" stroke="#000" stroke-width="10" fill="none"/>
-            <circle cx="400" cy="180" r="30" fill="#fff"/>
-            <circle cx="112" cy="180" r="30" fill="#fff"/>
-            <circle cx="400" cy="180" r="18" fill="#FF4500"/>
-            <circle cx="112" cy="180" r="18" fill="#FF4500"/>
-            <circle cx="256" cy="256" r="155" fill="none" stroke="#000" stroke-width="10"/>
-          </svg>
+      <div class="welcome-social">
+        <a href="https://reddit.com/r/artcrimes" target="_blank" rel="noopener" title="Reddit">
+          <svg viewBox="0 0 24 24" fill="#FF4500"><path d="M12 0A12 12 0 000 12a12 12 0 0024 0A12 12 0 0012 0zm5.01 13.38c.15.36.24.76.24 1.17 0 2.64-2.62 4.78-5.85 4.78-3.23 0-5.85-2.14-5.85-4.78 0-.41.09-.81.24-1.17a1.61 1.61 0 01-.68-1.32 1.62 1.62 0 012.78-1.12 7.85 7.85 0 014.06-1.27l.85-3.99a.34.34 0 01.4-.27l2.82.6a1.14 1.14 0 012.17.48 1.14 1.14 0 01-2.14.53l-2.5-.53-.76 3.56a7.82 7.82 0 013.98 1.26 1.62 1.62 0 012.44 1.07z"/></svg>
         </a>
-        <span class="popup-social-sep">|</span>
-        <a href="https://x.com/artcrimesgame" target="_blank" rel="noopener" class="popup-social-btn" title="Twitter/X">
-          <svg width="22" height="22" viewBox="0 0 40 40" style="vertical-align: middle;">
-            <rect width="40" height="40" fill="#000"/>
-            <path d="M6 34L18 20 6 6h6l8 9 8-9h6L22 20l12 14h-6l-8-9-8 9H6z" fill="#fff"/>
-          </svg>
+        <a href="https://x.com/artcrimesgame" target="_blank" rel="noopener" title="X / Twitter">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         </a>
-        <span class="popup-social-sep">|</span>
-        <a href="https://instagram.com/artcrimesgame" target="_blank" rel="noopener" class="popup-social-btn" title="Instagram">
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="#E1306C">
-            <path d="M7.75 2h8.5C19.1 2 22 4.9 22 7.75v8.5c0 2.85-2.9 5.75-5.75 5.75h-8.5C4.9 22 2 19.1 2 16.25v-8.5C2 4.9 4.9 2 7.75 2zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5A4.25 4.25 0 0 0 16.25 3.5h-8.5zm4.25 3.25a5.25 5.25 0 1 1 0 10.5 5.25 5.25 0 0 1 0-10.5zm0 1.5a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5zm6.25.75a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0z"/>
-          </svg>
+        <a href="https://instagram.com/artcrimesgame" target="_blank" rel="noopener" title="Instagram">
+          <svg viewBox="0 0 24 24" fill="#E1306C"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
         </a>
       </div>
-      <div class="popup-contact-row">
-        <span class="popup-contact-label">Contact:</span>
-        <a href="mailto:artcrimesgame@gmail.com" class="popup-email-link">artcrimesgame@gmail.com</a>
-      </div>
-      <div class="popup-disclaimer">
-        This website is free to use, at your own risk, and does not collect any personal data.
-      </div>
-      <button id="closeInfoPopup" class="popup-close-btn">Close</button>
+      <p class="welcome-disclaimer">Free to use. No personal data collected. Play at your own risk of creating terrible art.</p>
+      <button class="welcome-start-btn" id="closeWelcome">Start Drawing</button>
     </div>
   </div>
 
-  <!-- === CONFIRMATION POPUP === -->
+  <!-- ========== CONFIRMATION POPUP ========== -->
   <div class="confirm-overlay" id="confirmOverlay">
     <div class="confirm-box">
-      <h3>🚨 Submit your Art Crime?</h3>
+      <h3>Submit your Art Crime?</h3>
       <img id="confirmPreview" class="confirm-preview" src="" alt="Your drawing preview"/>
-      <div class="confirm-warning">
-        ⚠️ Once submitted, you won't be able to submit again until tomorrow's topic!
-      </div>
+      <div class="confirm-warning">Once submitted, you won't be able to submit again until tomorrow's topic!</div>
       <div class="confirm-btn-row">
         <button class="confirm-no" id="confirmNo">Cancel</button>
         <button class="confirm-yes" id="confirmYes">Submit!</button>
@@ -304,192 +93,492 @@
     </div>
   </div>
 
-  <div class="container">
-    <h1 style="margin-top:36px;">Today's topic: <span id="word">...</span></h1>
+  <!-- ========== MAIN CONTENT ========== -->
+  <main>
 
-    <div class="next-topic-timer">
-      Next topic in: <span id="countdown">--:--:--</span>
-    </div>
+    <!-- ===== DRAW TAB ===== -->
+    <section id="tab-draw" class="tab-content active">
 
-    <div class="canvas-wrap" id="canvasWrap">
-      <canvas id="bg-canvas" width="1200" height="900"></canvas>
-      <canvas id="draw-canvas" width="1200" height="900"></canvas>
-    </div>
-    <div class="canvas-controls-row">
-      <div class="zoom-controls">
-        <button id="zoomOut" title="Zoom out">−</button>
-        <span id="zoomDisplay">100%</span>
-        <button id="zoomIn" title="Zoom in">+</button>
-        <button id="zoomReset" title="Reset zoom">⟳</button>
+      <!-- Topic Header -->
+      <div class="topic-header">
+        <div class="topic-label">Today's Crime</div>
+        <h1 class="topic-word" id="word">...</h1>
+        <div class="topic-countdown">
+          Next topic in: <span id="countdown">--:--:--</span>
+        </div>
       </div>
-    </div>
-    <div class="pan-instruction">
-      🖐️ <span>To move the canvas while zoomed: hold <b>SPACE</b> and drag with mouse</span>
-    </div>
-    <div class="pan-instruction">
-      <span>To move the canvas while zoomed on mobile: use two fingers</span>
-    </div>
 
-    <div class="color-bg-row">
-      <label class="color-picker-label" for="openColorPickerSwatch">Color:</label>
-      <button id="openColorPickerSwatch" class="swatch selected-swatch"></button>
-      <label class="color-picker-label" for="openBgPickerSwatch">Background:</label>
-      <button id="openBgPickerSwatch" class="bg-swatch selected-bg-swatch"></button>
-    </div>
-
-    <div id="colorPickerModal" class="modal hidden">
-      <div class="modal-header">
-        <span>Choose Brush Color</span>
-        <button id="closeColorPicker" class="close-modal-btn">&times;</button>
+      <!-- Canvas -->
+      <div class="canvas-area">
+        <div class="canvas-wrap" id="canvasWrap">
+          <canvas id="bg-canvas" width="1200" height="900"></canvas>
+          <canvas id="draw-canvas" width="1200" height="900"></canvas>
+        </div>
+        <div class="canvas-toolbar">
+          <div class="zoom-controls">
+            <button id="zoomOut" title="Zoom out">-</button>
+            <span id="zoomDisplay">100%</span>
+            <button id="zoomIn" title="Zoom in">+</button>
+            <button id="zoomReset" title="Reset zoom">&#x21BB;</button>
+          </div>
+          <div class="pan-hint">Hold SPACE + drag to pan (desktop) | Two fingers to pan (mobile)</div>
+        </div>
       </div>
-      <div class="palette-row" id="palette-main"></div>
-      <div class="palette-row" id="palette-special"></div>
-      <label class="custom-color-label" title="Custom color">
-        <input type="color" id="customColor"/>
-        <span class="custom-color-btn"></span>
-      </label>
-    </div>
-    <div id="bgPickerModal" class="modal hidden">
-      <div class="modal-header">
-        <span>Choose Background Color</span>
-        <button id="closeBgPicker" class="close-modal-btn">&times;</button>
-      </div>
-      <div class="bg-palette-row" id="bg-palette-main"></div>
-      <div class="bg-palette-row" id="bg-palette-special"></div>
-      <label class="custom-bg-label" title="Custom background color">
-        <input type="color" id="customBgColor"/>
-        <span class="custom-bg-btn"></span>
-      </label>
-      <label class="grid-checkbox-label"><input type="checkbox" id="gridCheckbox"/> Grid</label>
-    </div>
 
-    <div class="tools-section">
-      <div class="tools-top-row">
-        <label class="line-width-label">
-          Line width:
+      <!-- Picker Triggers -->
+      <div class="picker-triggers">
+        <div class="picker-trigger">
+          <span class="picker-trigger-label">Color:</span>
+          <button id="openColorPickerSwatch" class="picker-swatch" title="Choose brush color"></button>
+        </div>
+        <div class="picker-trigger">
+          <span class="picker-trigger-label">Background:</span>
+          <button id="openBgPickerSwatch" class="picker-swatch" title="Choose background"></button>
+        </div>
+      </div>
+
+      <!-- Color Picker Modal -->
+      <div id="colorPickerModal" class="modal hidden">
+        <div class="modal-header">
+          <span>Brush Color</span>
+          <button id="closeColorPicker" class="close-modal-btn">&times;</button>
+        </div>
+        <div class="palette-row" id="palette-main"></div>
+        <div class="palette-row" id="palette-special"></div>
+        <label class="custom-color-label" title="Custom color">
+          <input type="color" id="customColor"/>
+          <span class="custom-color-btn"></span>
+        </label>
+      </div>
+
+      <!-- Background Picker Modal -->
+      <div id="bgPickerModal" class="modal hidden">
+        <div class="modal-header">
+          <span>Background Color</span>
+          <button id="closeBgPicker" class="close-modal-btn">&times;</button>
+        </div>
+        <div class="bg-palette-row" id="bg-palette-main"></div>
+        <div class="bg-palette-row" id="bg-palette-special"></div>
+        <label class="custom-bg-label" title="Custom background color">
+          <input type="color" id="customBgColor"/>
+          <span class="custom-bg-btn"></span>
+        </label>
+        <label class="grid-checkbox-label"><input type="checkbox" id="gridCheckbox"/> Grid</label>
+      </div>
+
+      <!-- Tools Bar -->
+      <div class="tools-bar">
+        <div class="tool-group">
+          <button id="eraser" class="tool-btn" title="Eraser">🧽 Eraser</button>
+          <button id="fill" class="tool-btn" title="Fill (bucket tool)">🪣 Fill</button>
+        </div>
+        <div class="tool-divider"></div>
+        <div class="tool-group">
+          <button id="undo" class="tool-btn" title="Undo (Ctrl+Z)">↶ Undo</button>
+          <button id="redo" class="tool-btn" title="Redo (Ctrl+Y)">↷ Redo</button>
+        </div>
+        <div class="tool-divider"></div>
+        <button id="clear" class="tool-btn clear-btn" title="Clear canvas">🗑 Clear</button>
+      </div>
+
+      <!-- Sliders -->
+      <div class="slider-row">
+        <div class="slider-group">
+          <span>Brush:</span>
           <input type="range" min="3" max="36" value="12" id="lineWidth">
-          <span id="lineWidthValue">12</span> px
-        </label>
-      </div>
-      <div class="tools-btn-row">
-        <button id="eraser" class="eraser-btn" title="Eraser"><span class="tool-emoji">🧽</span> Eraser</button>
-        <button id="fill" class="fill-btn" title="Fill (bucket tool)"><span class="tool-emoji">🎨</span> Fill</button>
-        <button id="undo" title="Undo (Ctrl+Z)">↶ Undo</button>
-        <button id="redo" title="Redo (Ctrl+Y)">↷ Redo</button>
-        <button id="clear" class="clear-btn" title="Clear">Clear</button>
-      </div>
-      <div class="tools-bottom-row">
-        <label style="margin-left:12px;">
-          Fill tolerance: <input type="range" id="fillTolerance" min="0" max="64" value="16">
-          <span id="fillToleranceValue">16</span>
-        </label>
-        <label style="margin-left:12px;">
-          Expand fill: <input type="range" id="expandFill" min="0" max="8" value="0">
-          <span id="expandFillValue">0</span> px
-        </label>
-      </div>
-    </div>
-
-    <div class="controls">
-      <button id="share" class="share-btn-main">Share</button>
-    </div>
-
-    <div id="shareModal" class="share-modal" style="display:none;">
-      <div class="share-modal-content">
-        <h2>Share your artwork</h2>
-        <div class="share-icon-row">
-          <button class="share-btn" id="shareTwitter" title="Share on Twitter">
-            <svg width="30" height="30" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-              <rect width="40" height="40" fill="#000"/>
-              <path d="M6 34L18 20 6 6h6l8 9 8-9h6L22 20l12 14h-6l-8-9-8 9H6z" fill="#ddd"/>
-            </svg>
-          </button>
-          <button class="share-btn" id="shareInstagram" title="Share on Instagram">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="#E1306C"><path d="M7.75 2h8.5C19.1 2 22 4.9 22 7.75v8.5c0 2.85-2.9 5.75-5.75 5.75h-8.5C4.9 22 2 19.1 2 16.25v-8.5C2 4.9 4.9 2 7.75 2zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5A4.25 4.25 0 0 0 16.25 3.5h-8.5zm4.25 3.25a5.25 5.25 0 1 1 0 10.5 5.25 5.25 0 0 1 0-10.5zm0 1.5a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5zm6.25.75a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0z"/></svg>
-          </button>
-          <button class="share-btn" id="shareFacebook" title="Share on Facebook">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="#4267B2"><path d="M22.675 0h-21.35C.592 0 0 .592 0 1.325v21.351C0 23.407.592 24 1.325 24h11.495v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.797.143v3.24l-1.921.001c-1.505 0-1.797.716-1.797 1.767v2.318h3.587l-.467 3.622h-3.12V24h6.116C23.408 24 24 23.408 24 22.676V1.325C24 .592 23.408 0 22.675 0"/></svg>
-          </button>
-          <button class="share-btn" id="shareReddit" title="Share on Reddit">
-            <svg width="30" height="30" viewBox="0 0 512 512"><circle cx="256" cy="256" r="256" fill="#FF4500"/><ellipse cx="256" cy="300" rx="115" ry="80" fill="#fff"/><ellipse cx="205" cy="295" rx="20" ry="20" fill="#FF4500"/><ellipse cx="307" cy="295" rx="20" ry="20" fill="#FF4500"/><ellipse cx="256" cy="340" rx="40" ry="18" fill="#fff"/><path d="M214 224c0-23.2 18.8-42 42-42s42 18.8 42 42" stroke="#000" stroke-width="10" fill="none"/><circle cx="400" cy="180" r="30" fill="#fff"/><circle cx="112" cy="180" r="30" fill="#fff"/><circle cx="400" cy="180" r="18" fill="#FF4500"/><circle cx="112" cy="180" r="18" fill="#FF4500"/><circle cx="256" cy="256" r="155" fill="none" stroke="#000" stroke-width="10"/></svg>
-          </button>
-          <button class="share-btn" id="downloadImg" title="Download image">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="#7b60fa"><path d="M12 16.5l4-4h-3V3h-2v9.5H8l4 4zm-8 2V21h16v-2.5H4z"/></svg>
-          </button>
+          <span class="slider-value" id="lineWidthValue">12</span><span>px</span>
         </div>
-        <div style="margin-top: 10px;">
-          <b>Note:</b> Download the image, then post it on social media.
+        <div class="slider-group">
+          <span>Fill tolerance:</span>
+          <input type="range" id="fillTolerance" min="0" max="64" value="16">
+          <span class="slider-value" id="fillToleranceValue">16</span>
         </div>
-        <button id="closeModal" style="margin-top:15px;">Close</button>
+        <div class="slider-group">
+          <span>Fill expand:</span>
+          <input type="range" id="expandFill" min="0" max="8" value="0">
+          <span class="slider-value" id="expandFillValue">0</span><span>px</span>
+        </div>
       </div>
-    </div>
 
-    <p id="info">Draw your version of the topic above and share your artwork on social media with <b>#ArtCrimesGame</b></p>
+      <!-- Action Buttons -->
+      <div class="action-row">
+        <button id="share" class="share-btn-main">Share</button>
+      </div>
 
-    <div class="submit-section">
-      <input type="text" id="displayName" placeholder="Your name (optional)" maxlength="24" class="name-input"/>
-      <button id="submitDrawing" class="submit-btn">🚨 Submit Crime</button>
-      <span id="submitStatus" class="submit-status"></span>
-    </div>
-    <div id="alreadySubmittedMsg" class="already-submitted-msg" style="display:none;">
-      ✅ You already submitted today's crime. Come back tomorrow for a new topic!
-    </div>
+      <p id="info">Draw your version of the topic and share with <b>#ArtCrimesGame</b></p>
 
-    <div class="gallery-section">
-      <h2 class="gallery-title">Today's Crime Scene 🚨</h2>
-      <div id="gallery" class="gallery-grid"></div>
-    </div>
+      <!-- Submit Section -->
+      <div class="submit-section">
+        <input type="text" id="displayName" placeholder="Your name (optional)" maxlength="24" class="name-input"/>
+        <button id="submitDrawing" class="submit-btn">Submit Crime</button>
+        <span id="submitStatus" class="submit-status"></span>
+      </div>
+      <div id="alreadySubmittedMsg" class="already-submitted-msg" style="display:none;">
+        You already submitted today's crime. Come back tomorrow for a new topic!
+      </div>
 
+      <!-- Today's Gallery (inline) -->
+      <div class="gallery-section">
+        <div class="section-header">
+          <h2 class="section-title">Today's Crime Scene <span class="badge">LIVE</span></h2>
+        </div>
+        <div id="gallery" class="gallery-grid"></div>
+      </div>
+    </section>
+
+    <!-- ===== GALLERY TAB ===== -->
+    <section id="tab-gallery" class="tab-content">
+      <div class="gallery-tab-header">
+        <h2>Crime Scene Gallery</h2>
+        <input type="text" class="gallery-search" id="gallerySearch" placeholder="Search by name...">
+      </div>
+      <div id="galleryFull" class="gallery-grid"></div>
+    </section>
+
+    <!-- ===== LEADERBOARD TAB ===== -->
+    <section id="tab-leaderboard" class="tab-content">
+      <div class="leaderboard-section">
+        <div class="leaderboard-header">
+          <h2>Most Wanted</h2>
+          <p>The biggest art criminals ranked by crimes committed</p>
+        </div>
+        <div class="leaderboard-filters">
+          <button class="filter-btn active" data-period="today">Today</button>
+          <button class="filter-btn" data-period="week">This Week</button>
+          <button class="filter-btn" data-period="month">This Month</button>
+          <button class="filter-btn" data-period="all">All Time</button>
+        </div>
+        <div id="leaderboardList" class="leaderboard-list"></div>
+      </div>
+    </section>
+
+    <!-- ===== SETTINGS TAB ===== -->
+    <section id="tab-settings" class="tab-content">
+      <div class="settings-section">
+        <div class="settings-header">
+          <h2>Settings</h2>
+          <p>Customize your Art Crimes experience</p>
+        </div>
+
+        <!-- Profile -->
+        <div class="settings-group">
+          <div class="settings-group-title">Profile</div>
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">Display Name</div>
+              <div class="setting-desc">Shown on your submissions</div>
+            </div>
+            <input type="text" id="settingsName" class="settings-input" placeholder="Anonymous" maxlength="24">
+          </div>
+        </div>
+
+        <!-- Appearance -->
+        <div class="settings-group">
+          <div class="settings-group-title">Appearance</div>
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">Theme</div>
+              <div class="setting-desc">Switch between dark and light mode</div>
+            </div>
+            <div class="theme-switch" id="themeSwitch">
+              <button class="active" data-theme="dark">Dark</button>
+              <button data-theme="light">Light</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sound -->
+        <div class="settings-group">
+          <div class="settings-group-title">Sound</div>
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">Ambient Music</div>
+              <div class="setting-desc">Relaxing background tones while you draw</div>
+            </div>
+            <div class="volume-control">
+              <button id="musicToggle" class="tool-btn" title="Toggle music" style="width:auto;padding:6px 12px;font-size:13px;">Off</button>
+              <input type="range" id="musicVolume" min="0" max="100" value="30">
+              <span class="volume-value" id="musicVolumeValue">30%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- About -->
+        <div class="settings-group">
+          <div class="settings-group-title">About</div>
+          <div class="about-card">
+            <p>
+              <b>Art Crimes</b> is a daily drawing challenge where you draw the day's topic
+              in the most hilariously bad way possible. Anyone can draw, but who can draw it
+              the best in the ugliest way?
+            </p>
+            <p style="font-size:12px;color:var(--text-2);">
+              Free to use. No personal data collected.
+            </p>
+            <div class="about-links">
+              <a href="https://reddit.com/r/artcrimes" target="_blank" rel="noopener" class="about-link">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0A12 12 0 000 12a12 12 0 0024 0A12 12 0 0012 0zm5.01 13.38c.15.36.24.76.24 1.17 0 2.64-2.62 4.78-5.85 4.78-3.23 0-5.85-2.14-5.85-4.78 0-.41.09-.81.24-1.17a1.61 1.61 0 01-.68-1.32 1.62 1.62 0 012.78-1.12 7.85 7.85 0 014.06-1.27l.85-3.99a.34.34 0 01.4-.27l2.82.6a1.14 1.14 0 012.17.48 1.14 1.14 0 01-2.14.53l-2.5-.53-.76 3.56a7.82 7.82 0 013.98 1.26 1.62 1.62 0 012.44 1.07z"/></svg>
+                Reddit
+              </a>
+              <a href="https://x.com/artcrimesgame" target="_blank" rel="noopener" class="about-link">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                X / Twitter
+              </a>
+              <a href="https://instagram.com/artcrimesgame" target="_blank" rel="noopener" class="about-link">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                Instagram
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========== SHARE MODAL ========== -->
+  <div id="shareModal" class="share-modal" style="display:none;">
+    <div class="share-modal-content">
+      <h2>Share Your Artwork</h2>
+      <div class="share-icon-row">
+        <button class="share-btn" id="shareTwitter" title="Share on X">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </button>
+        <button class="share-btn" id="shareInstagram" title="Share on Instagram">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="#E1306C"><path d="M7.75 2h8.5C19.1 2 22 4.9 22 7.75v8.5c0 2.85-2.9 5.75-5.75 5.75h-8.5C4.9 22 2 19.1 2 16.25v-8.5C2 4.9 4.9 2 7.75 2zm0 1.5A4.25 4.25 0 003.5 7.75v8.5A4.25 4.25 0 007.75 20.5h8.5a4.25 4.25 0 004.25-4.25v-8.5A4.25 4.25 0 0016.25 3.5h-8.5zm4.25 3.25a5.25 5.25 0 110 10.5 5.25 5.25 0 010-10.5zm0 1.5a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5zm6.25.75a1.25 1.25 0 11-2.5 0 1.25 1.25 0 012.5 0z"/></svg>
+        </button>
+        <button class="share-btn" id="shareFacebook" title="Share on Facebook">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="#4267B2"><path d="M22.675 0h-21.35C.592 0 0 .592 0 1.325v21.351C0 23.407.592 24 1.325 24h11.495v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.797.143v3.24l-1.921.001c-1.505 0-1.797.716-1.797 1.767v2.318h3.587l-.467 3.622h-3.12V24h6.116C23.408 24 24 23.408 24 22.676V1.325C24 .592 23.408 0 22.675 0"/></svg>
+        </button>
+        <button class="share-btn" id="shareReddit" title="Share on Reddit">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="#FF4500"><path d="M12 0A12 12 0 000 12a12 12 0 0024 0A12 12 0 0012 0zm5.01 13.38c.15.36.24.76.24 1.17 0 2.64-2.62 4.78-5.85 4.78-3.23 0-5.85-2.14-5.85-4.78 0-.41.09-.81.24-1.17a1.61 1.61 0 01-.68-1.32 1.62 1.62 0 012.78-1.12 7.85 7.85 0 014.06-1.27l.85-3.99a.34.34 0 01.4-.27l2.82.6a1.14 1.14 0 012.17.48 1.14 1.14 0 01-2.14.53l-2.5-.53-.76 3.56a7.82 7.82 0 013.98 1.26 1.62 1.62 0 012.44 1.07z"/></svg>
+        </button>
+        <button class="share-btn" id="downloadImg" title="Download image">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="#7c5cfc"><path d="M12 16.5l4-4h-3V3h-2v9.5H8l4 4zm-8 2V21h16v-2.5H4z"/></svg>
+        </button>
+      </div>
+      <p class="note">Download the image, then post it on social media.</p>
+      <button id="closeModal" class="close-share">Close</button>
+    </div>
   </div>
 
-  <!-- === SITE FOOTER === -->
+  <!-- ========== FOOTER ========== -->
   <footer class="site-footer">
-    <div class="footer-social-row">
-      <span class="footer-social-label">Follow us:</span>
-      <a href="https://reddit.com/r/artcrimes" target="_blank" rel="noopener" class="footer-social-btn" title="Reddit">
-        <svg width="22" height="22" viewBox="0 0 512 512"><circle cx="256" cy="256" r="256" fill="#FF4500"/><ellipse cx="256" cy="300" rx="115" ry="80" fill="#fff"/><ellipse cx="205" cy="295" rx="20" ry="20" fill="#FF4500"/><ellipse cx="307" cy="295" rx="20" ry="20" fill="#FF4500"/><ellipse cx="256" cy="340" rx="40" ry="18" fill="#fff"/><path d="M214 224c0-23.2 18.8-42 42-42s42 18.8 42 42" stroke="#000" stroke-width="10" fill="none"/><circle cx="400" cy="180" r="30" fill="#fff"/><circle cx="112" cy="180" r="30" fill="#fff"/><circle cx="400" cy="180" r="18" fill="#FF4500"/><circle cx="112" cy="180" r="18" fill="#FF4500"/><circle cx="256" cy="256" r="155" fill="none" stroke="#000" stroke-width="10"/></svg>
-      </a>
-      <span class="footer-social-sep">|</span>
-      <a href="https://x.com/artcrimesgame" target="_blank" rel="noopener" class="footer-social-btn" title="Twitter/X">
-        <svg width="22" height="22" viewBox="0 0 40 40"><rect width="40" height="40" fill="#000"/><path d="M6 34L18 20 6 6h6l8 9 8-9h6L22 20l12 14h-6l-8-9-8 9H6z" fill="#fff"/></svg>
-      </a>
-      <span class="footer-social-sep">|</span>
-      <a href="https://instagram.com/artcrimesgame" target="_blank" rel="noopener" class="footer-social-btn" title="Instagram">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="#E1306C"><path d="M7.75 2h8.5C19.1 2 22 4.9 22 7.75v8.5c0 2.85-2.9 5.75-5.75 5.75h-8.5C4.9 22 2 19.1 2 16.25v-8.5C2 4.9 4.9 2 7.75 2zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5A4.25 4.25 0 0 0 16.25 3.5h-8.5zm4.25 3.25a5.25 5.25 0 1 1 0 10.5 5.25 5.25 0 0 1 0-10.5zm0 1.5a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5zm6.25.75a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0z"/></svg>
-      </a>
-    </div>
-    <div class="footer-contact-row">
-      <span class="footer-contact-label">Contact:</span>
-      <a href="mailto:artcrimesgame@gmail.com" class="footer-email-link">artcrimesgame@gmail.com</a>
-      <span class="footer-contact-sep">|</span>
-      <span class="footer-feedback-label">Feedback/Suggestion:</span>
-      <a href="mailto:artcrimesfeedback@gmail.com" class="footer-email-link">artcrimesfeedback@gmail.com</a>
-    </div>
-    <div class="footer-branding-row">
-      <span class="footer-copyright">© 2025 Art Crimes. All rights reserved.</span>
+    <div class="footer-inner">
+      <div class="footer-social-row">
+        <a href="https://reddit.com/r/artcrimes" target="_blank" rel="noopener" class="footer-social-btn" title="Reddit">
+          <svg viewBox="0 0 24 24" fill="#FF4500"><path d="M12 0A12 12 0 000 12a12 12 0 0024 0A12 12 0 0012 0zm5.01 13.38c.15.36.24.76.24 1.17 0 2.64-2.62 4.78-5.85 4.78-3.23 0-5.85-2.14-5.85-4.78 0-.41.09-.81.24-1.17a1.61 1.61 0 01-.68-1.32 1.62 1.62 0 012.78-1.12 7.85 7.85 0 014.06-1.27l.85-3.99a.34.34 0 01.4-.27l2.82.6a1.14 1.14 0 012.17.48 1.14 1.14 0 01-2.14.53l-2.5-.53-.76 3.56a7.82 7.82 0 013.98 1.26 1.62 1.62 0 012.44 1.07z"/></svg>
+        </a>
+        <a href="https://x.com/artcrimesgame" target="_blank" rel="noopener" class="footer-social-btn" title="X / Twitter">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+        <a href="https://instagram.com/artcrimesgame" target="_blank" rel="noopener" class="footer-social-btn" title="Instagram">
+          <svg viewBox="0 0 24 24" fill="#E1306C"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        </a>
+      </div>
+      <div class="footer-links">
+        <a href="mailto:artcrimesgame@gmail.com">Contact</a>
+        <span class="footer-sep">|</span>
+        <a href="mailto:artcrimesgamefeedback@gmail.com">Feedback</a>
+      </div>
+      <div class="footer-copyright">&copy; 2025 Art Crimes. All rights reserved.</div>
     </div>
   </footer>
 
-  <script src="theme/theme.js"></script>
+  <!-- ========== SCRIPTS ========== -->
   <script src="draw.js"></script>
-
   <script type="module">
     import { getTodaysTheme } from './themes.js';
+    import { submitDrawing, getTodaysSubmissions } from './gallery.js';
 
     const today = new Date().toISOString().slice(0, 10);
 
-    function initCore() {
+    // ── Init ──────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('word').textContent = getTodaysTheme();
-      startCountdown();
+      initTheme();
+      initNavigation();
+      initWelcome();
+      initSettings();
+      initMusic();
       checkAlreadySubmitted();
+      loadGallery();
+      startCountdown();
+      syncDisplayName();
+    });
+
+    // ── Navigation (tab switching) ────────────────────────
+    function initNavigation() {
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const targetId = tab.dataset.tab;
+          document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.getElementById(targetId).classList.add('active');
+          tab.classList.add('active');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+
+          if (targetId === 'tab-gallery') loadFullGallery();
+          if (targetId === 'tab-leaderboard') loadLeaderboard();
+        });
+      });
     }
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initCore);
-    } else {
-      initCore();
+    // ── Welcome Modal ─────────────────────────────────────
+    function initWelcome() {
+      const modal = document.getElementById('welcomeModal');
+      const shown = localStorage.getItem('artcrimes_welcome_shown');
+      if (!shown) {
+        modal.classList.add('active');
+      }
+      document.getElementById('closeWelcome').addEventListener('click', () => {
+        modal.classList.remove('active');
+        localStorage.setItem('artcrimes_welcome_shown', 'true');
+      });
     }
 
+    // ── Theme ─────────────────────────────────────────────
+    function initTheme() {
+      const saved = localStorage.getItem('artcrimes_theme');
+      if (saved === 'light') {
+        document.body.classList.add('light');
+      }
+      updateThemeButtons();
+    }
+
+    function updateThemeButtons() {
+      const isLight = document.body.classList.contains('light');
+      document.querySelectorAll('#themeSwitch button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.theme === (isLight ? 'light' : 'dark'));
+      });
+    }
+
+    // ── Settings ──────────────────────────────────────────
+    function initSettings() {
+      // Theme switch
+      document.querySelectorAll('#themeSwitch button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const theme = btn.dataset.theme;
+          if (theme === 'light') {
+            document.body.classList.add('light');
+          } else {
+            document.body.classList.remove('light');
+          }
+          localStorage.setItem('artcrimes_theme', theme);
+          updateThemeButtons();
+          if (typeof drawBgCanvas === 'function') drawBgCanvas();
+          if (typeof renderAll === 'function') renderAll();
+        });
+      });
+
+      // Display name sync
+      const nameInput = document.getElementById('settingsName');
+      nameInput.value = localStorage.getItem('artcrimes_name') || '';
+      nameInput.addEventListener('input', () => {
+        localStorage.setItem('artcrimes_name', nameInput.value.trim());
+        document.getElementById('displayName').value = nameInput.value.trim();
+      });
+    }
+
+    function syncDisplayName() {
+      const saved = localStorage.getItem('artcrimes_name');
+      if (saved) {
+        document.getElementById('displayName').value = saved;
+        document.getElementById('settingsName').value = saved;
+      }
+      document.getElementById('displayName').addEventListener('input', () => {
+        const val = document.getElementById('displayName').value.trim();
+        localStorage.setItem('artcrimes_name', val);
+        document.getElementById('settingsName').value = val;
+      });
+    }
+
+    // ── Ambient Music (Web Audio API) ─────────────────────
+    let musicCtx = null;
+    let musicGain = null;
+    let musicPlaying = false;
+    let musicOscillators = [];
+
+    function initMusic() {
+      const toggle = document.getElementById('musicToggle');
+      const volume = document.getElementById('musicVolume');
+      const volVal = document.getElementById('musicVolumeValue');
+
+      const savedVol = localStorage.getItem('artcrimes_music_vol');
+      if (savedVol !== null) {
+        volume.value = savedVol;
+        volVal.textContent = savedVol + '%';
+      }
+
+      toggle.addEventListener('click', () => {
+        if (musicPlaying) {
+          stopMusic();
+          toggle.textContent = 'Off';
+          toggle.classList.remove('active');
+        } else {
+          startMusic(parseInt(volume.value) / 100);
+          toggle.textContent = 'On';
+          toggle.classList.add('active');
+        }
+      });
+
+      volume.addEventListener('input', () => {
+        const v = parseInt(volume.value);
+        volVal.textContent = v + '%';
+        localStorage.setItem('artcrimes_music_vol', v);
+        if (musicGain) musicGain.gain.value = v / 100 * 0.4;
+      });
+    }
+
+    function startMusic(vol) {
+      if (musicPlaying) return;
+      musicCtx = new (window.AudioContext || window.webkitAudioContext)();
+      musicGain = musicCtx.createGain();
+      musicGain.gain.value = vol * 0.4;
+      musicGain.connect(musicCtx.destination);
+
+      // Dreamy ambient pad
+      const notes = [
+        { freq: 110, type: 'sine', vol: 0.18 },
+        { freq: 164.81, type: 'sine', vol: 0.10 },
+        { freq: 220, type: 'triangle', vol: 0.06 },
+        { freq: 329.63, type: 'sine', vol: 0.04 },
+        { freq: 55, type: 'sine', vol: 0.12 },
+      ];
+      notes.forEach(n => {
+        const osc = musicCtx.createOscillator();
+        const g = musicCtx.createGain();
+        osc.type = n.type;
+        osc.frequency.value = n.freq;
+        g.gain.value = n.vol;
+
+        // Subtle LFO for movement
+        const lfo = musicCtx.createOscillator();
+        const lfoG = musicCtx.createGain();
+        lfo.frequency.value = 0.15 + Math.random() * 0.25;
+        lfoG.gain.value = n.freq * 0.015;
+        lfo.connect(lfoG);
+        lfoG.connect(osc.frequency);
+        lfo.start();
+
+        osc.connect(g);
+        g.connect(musicGain);
+        osc.start();
+        musicOscillators.push(osc, lfo);
+      });
+      musicPlaying = true;
+    }
+
+    function stopMusic() {
+      musicOscillators.forEach(o => { try { o.stop(); } catch(e) {} });
+      musicOscillators = [];
+      if (musicCtx) { musicCtx.close(); musicCtx = null; }
+      musicGain = null;
+      musicPlaying = false;
+    }
+
+    // ── Countdown to midnight ─────────────────────────────
     function startCountdown() {
       function update() {
         const now = new Date();
@@ -498,166 +587,222 @@
         const diff = midnight - now;
         const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
         const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-        const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '00');
-        document.getElementById('countdown').textContent = h + ':' + m + ':' + s;
+        const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+        document.getElementById('countdown').textContent = `${h}:${m}:${s}`;
       }
       update();
       setInterval(update, 1000);
     }
 
+    // ── Daily submit limit ────────────────────────────────
     function checkAlreadySubmitted() {
-      if (localStorage.getItem('artcrimes_submitted') === today) {
-        lockSubmitButton();
-      }
+      if (localStorage.getItem('artcrimes_submitted') === today) lockSubmitButton();
     }
-
     function lockSubmitButton() {
       document.getElementById('submitDrawing').disabled = true;
       document.getElementById('submitDrawing').title = 'You already submitted today!';
       document.getElementById('alreadySubmittedMsg').style.display = 'block';
     }
-
-    window._markAsSubmitted = function() {
+    function markAsSubmitted() {
       localStorage.setItem('artcrimes_submitted', today);
       lockSubmitButton();
+    }
+
+    // ── Gallery ───────────────────────────────────────────
+    function timeAgo(dateStr) {
+      const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+      if (diff < 60) return `${diff}s ago`;
+      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+      return `${Math.floor(diff / 86400)}d ago`;
+    }
+
+    function getLikes(id) {
+      const likes = JSON.parse(localStorage.getItem('artcrimes_likes') || '{}');
+      return likes[id] || 0;
+    }
+    function isLiked(id) {
+      const liked = JSON.parse(localStorage.getItem('artcrimes_liked') || '{}');
+      return !!liked[id];
+    }
+    function toggleLike(id) {
+      const liked = JSON.parse(localStorage.getItem('artcrimes_liked') || '{}');
+      const likes = JSON.parse(localStorage.getItem('artcrimes_likes') || '{}');
+      if (liked[id]) {
+        delete liked[id];
+        likes[id] = Math.max(0, (likes[id] || 1) - 1);
+      } else {
+        liked[id] = true;
+        likes[id] = (likes[id] || 0) + 1;
+      }
+      localStorage.setItem('artcrimes_liked', JSON.stringify(liked));
+      localStorage.setItem('artcrimes_likes', JSON.stringify(likes));
+    }
+
+    function renderGalleryCards(submissions, container) {
+      if (!submissions.length) {
+        container.innerHTML = '<p class="gallery-empty">No submissions yet. Be the first to commit a crime!</p>';
+        return;
+      }
+      container.innerHTML = submissions.map(s => {
+        const rot = (Math.random() * 3 - 1.5).toFixed(2);
+        const id = s.id || s.image_url;
+        const likeCount = getLikes(id);
+        const likedClass = isLiked(id) ? 'liked' : '';
+        return `
+          <div class="gallery-card" style="--rot: ${rot}deg">
+            <img src="${s.image_url}" alt="Submission by ${s.display_name || 'Anonymous'}" loading="lazy"/>
+            <div class="gallery-card-info">
+              <span class="card-author">${s.display_name || 'Anonymous'}</span>
+              <span>${timeAgo(s.created_at)}</span>
+            </div>
+            <div class="gallery-card-actions">
+              <button class="like-btn ${likedClass}" data-id="${id}" onclick="window._toggleLike(this, '${id}')">
+                ${isLiked(id) ? '&#10084;' : '&#9825;'} ${likeCount}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Global like handler
+    window._toggleLike = function(btn, id) {
+      toggleLike(id);
+      const count = getLikes(id);
+      const liked = isLiked(id);
+      btn.classList.toggle('liked', liked);
+      btn.innerHTML = `${liked ? '&#10084;' : '&#9825;'} ${count}`;
     };
-  </script>
 
-  <script type="module">
-    import { submitDrawing, getTodaysSubmissions, likeSubmission, dislikeSubmission, reportSubmission } from './gallery.js';
+    async function loadGallery() {
+      const submissions = await getTodaysSubmissions();
+      renderGalleryCards(submissions, document.getElementById('gallery'));
+    }
 
+    async function loadFullGallery() {
+      const submissions = await getTodaysSubmissions();
+      const container = document.getElementById('galleryFull');
+      renderGalleryCards(submissions, container);
+
+      // Search filter
+      document.getElementById('gallerySearch').oninput = function() {
+        const q = this.value.toLowerCase();
+        const filtered = submissions.filter(s =>
+          (s.display_name || 'Anonymous').toLowerCase().includes(q)
+        );
+        renderGalleryCards(filtered, container);
+      };
+    }
+
+    // ── Leaderboard ───────────────────────────────────────
+    async function loadLeaderboard() {
+      const submissions = await getTodaysSubmissions();
+      renderLeaderboard(submissions);
+
+      // Period filters
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          // For now all periods show today's data (needs backend for historical)
+          renderLeaderboard(submissions);
+        });
+      });
+    }
+
+    function renderLeaderboard(submissions) {
+      const list = document.getElementById('leaderboardList');
+      if (!submissions.length) {
+        list.innerHTML = '<p class="leaderboard-empty">No crimes committed yet. Be the first!</p>';
+        return;
+      }
+
+      // Rank by number of submissions per user + likes
+      const userStats = {};
+      submissions.forEach(s => {
+        const name = s.display_name || 'Anonymous';
+        if (!userStats[name]) userStats[name] = { name, count: 0, latestImg: '', likes: 0, topic: '' };
+        userStats[name].count++;
+        userStats[name].latestImg = s.image_url;
+        userStats[name].topic = s.topic_date;
+        const id = s.id || s.image_url;
+        userStats[name].likes += getLikes(id);
+      });
+
+      const ranked = Object.values(userStats).sort((a, b) => (b.count + b.likes) - (a.count + a.likes));
+      const medals = ['&#129351;', '&#129352;', '&#129353;']; // gold, silver, bronze
+
+      list.innerHTML = ranked.map((u, i) => `
+        <div class="leaderboard-item ${i < 3 ? 'top-3' : ''}">
+          <div class="rank-number">${i < 3 ? `<span class="rank-medal">${medals[i]}</span>` : `#${i + 1}`}</div>
+          <img src="${u.latestImg}" class="rank-img" alt="${u.name}'s art" loading="lazy">
+          <div class="rank-info">
+            <div class="rank-name">${u.name}</div>
+            <div class="rank-topic">${u.count} submission${u.count > 1 ? 's' : ''}</div>
+          </div>
+          <div class="rank-score">&#10084; ${u.likes}</div>
+        </div>
+      `).join('');
+    }
+
+    // ── Merge canvases helper ─────────────────────────────
     function buildMergedCanvas() {
       const bgCanvas = document.getElementById('bg-canvas');
       const drawCanvas = document.getElementById('draw-canvas');
       const merged = document.createElement('canvas');
       merged.width = drawCanvas.width;
       merged.height = drawCanvas.height;
-      const ctx = merged.getContext('2d');
-      ctx.drawImage(bgCanvas, 0, 0);
-      ctx.drawImage(drawCanvas, 0, 0);
+      const mctx = merged.getContext('2d');
+      mctx.drawImage(bgCanvas, 0, 0);
+      mctx.drawImage(drawCanvas, 0, 0);
       return merged;
     }
 
-    function timeAgo(dateStr) {
-      const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
-      if (diff < 60) return diff + 's ago';
-      if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
-      if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
-      return Math.floor(diff / 86400) + 'd ago';
-    }
+    // ── Submit button → confirmation popup ────────────────
+    document.getElementById('submitDrawing').addEventListener('click', () => {
+      const merged = buildMergedCanvas();
+      document.getElementById('confirmPreview').src = merged.toDataURL('image/jpeg', 0.7);
+      document.getElementById('confirmOverlay').classList.add('active');
+    });
 
-    function renderGallery(submissions) {
-      const grid = document.getElementById('gallery');
-      if (!submissions.length) {
-        grid.innerHTML = '<p style="color:#aaa; grid-column:1/-1;">No submissions yet today. Be the first! 🎨</p>';
-        return;
-      }
-      grid.innerHTML = submissions.map(s => {
-        const rot = (Math.random() * 4 - 2).toFixed(2);
-        return `
-          <div class="gallery-card" style="--rot: ${rot}deg" data-id="${s.id}">
-            <img src="${s.image_url}" alt="Submission by ${s.display_name || 'Anonymous'}" loading="lazy"/>
-            <div class="gallery-card-info">
-              <span>🎨 ${s.display_name || 'Anonymous'}</span>
-              <span>${timeAgo(s.created_at)}</span>
-            </div>
-            <div class="gallery-card-reactions">
-              <button class="reaction-btn like-btn" data-id="${s.id}">👍 <span>${s.likes || 0}</span></button>
-              <button class="reaction-btn dislike-btn" data-id="${s.id}">👎 <span>${s.dislikes || 0}</span></button>
-              <button class="reaction-btn report-btn" data-id="${s.id}" title="Report as inappropriate">🚩</button>
-            </div>
-          </div>
-        `;
-      }).join('');
+    document.getElementById('confirmNo').addEventListener('click', () => {
+      document.getElementById('confirmOverlay').classList.remove('active');
+    });
 
-      grid.querySelectorAll('.like-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const ok = await likeSubmission(btn.dataset.id);
-          if (ok) { btn.querySelector('span').textContent = parseInt(btn.querySelector('span').textContent) + 1; btn.disabled = true; }
-        });
-      });
-
-      grid.querySelectorAll('.dislike-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const ok = await dislikeSubmission(btn.dataset.id);
-          if (ok) { btn.querySelector('span').textContent = parseInt(btn.querySelector('span').textContent) + 1; btn.disabled = true; }
-        });
-      });
-
-      grid.querySelectorAll('.report-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          if (!confirm('Report this drawing as inappropriate?')) return;
-          const ok = await reportSubmission(btn.dataset.id);
-          if (ok) {
-            btn.textContent = '✅';
-            btn.disabled = true;
-            btn.title = 'Reported — admin will review';
-          }
-        });
-      });
-    }
-
-    async function loadGallery() {
-      try {
-        const submissions = await getTodaysSubmissions();
-        renderGallery(submissions);
-      } catch(e) {
-        console.error('Gallery load failed:', e);
-      }
-    }
-
-    function initGallery() {
-      loadGallery();
-
-      document.getElementById('submitDrawing').addEventListener('click', () => {
-        const merged = buildMergedCanvas();
-        document.getElementById('confirmPreview').src = merged.toDataURL('image/jpeg', 0.7);
-        document.getElementById('confirmOverlay').classList.add('active');
-      });
-
-      document.getElementById('confirmNo').addEventListener('click', () => {
+    document.getElementById('confirmOverlay').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('confirmOverlay')) {
         document.getElementById('confirmOverlay').classList.remove('active');
-      });
+      }
+    });
 
-      document.getElementById('confirmOverlay').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('confirmOverlay')) {
-          document.getElementById('confirmOverlay').classList.remove('active');
-        }
-      });
+    document.getElementById('confirmYes').addEventListener('click', async () => {
+      const overlay = document.getElementById('confirmOverlay');
+      const status = document.getElementById('submitStatus');
+      const name = document.getElementById('displayName').value.trim() || 'Anonymous';
 
-      document.getElementById('confirmYes').addEventListener('click', async () => {
-        const overlay = document.getElementById('confirmOverlay');
-        const status = document.getElementById('submitStatus');
-        const name = document.getElementById('displayName').value.trim() || 'Anonymous';
+      overlay.classList.remove('active');
+      status.textContent = 'Submitting...';
+      document.getElementById('submitDrawing').disabled = true;
 
-        overlay.classList.remove('active');
-        status.textContent = 'Submitting...';
-        document.getElementById('submitDrawing').disabled = true;
+      const merged = buildMergedCanvas();
+      merged.id = 'merged-canvas';
+      document.body.appendChild(merged);
 
-        const merged = buildMergedCanvas();
-        merged.id = 'merged-canvas';
-        document.body.appendChild(merged);
+      const result = await submitDrawing('merged-canvas', name);
+      document.body.removeChild(merged);
 
-        const result = await submitDrawing('merged-canvas', name);
-        document.body.removeChild(merged);
+      if (result.success) {
+        status.textContent = 'Crime submitted!';
+        markAsSubmitted();
+        loadGallery();
+        setTimeout(() => { status.textContent = ''; }, 3000);
+      } else {
+        status.textContent = 'Something went wrong. Try again.';
+        document.getElementById('submitDrawing').disabled = false;
+      }
+    });
 
-        if (result.success) {
-          status.textContent = '✅ Crime submitted!';
-          if (window._markAsSubmitted) window._markAsSubmitted();
-          loadGallery();
-          setTimeout(() => { status.textContent = ''; }, 3000);
-        } else {
-          status.textContent = '❌ Something went wrong. Try again.';
-          document.getElementById('submitDrawing').disabled = false;
-        }
-      });
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initGallery);
-    } else {
-      initGallery();
-    }
   </script>
 </body>
 </html>
