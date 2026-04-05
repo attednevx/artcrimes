@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Permanent+Marker&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="draw.css">
+  <link rel="stylesheet" href="draw.css?v=6">
 </head>
 <body>
 
@@ -32,6 +32,10 @@
         <button class="nav-tab" data-tab="tab-leaderboard">
           <svg viewBox="0 0 24 24"><path d="M7 4V2H17V4H20C20.55 4 21 4.45 21 5V9C21 10.66 19.66 12 18 12H17.42C16.9 14.77 14.72 16.95 12 17.42V20H16V22H8V20H12V17.42C9.28 16.95 7.1 14.77 6.58 12H6C4.34 12 3 10.66 3 9V5C3 4.45 3.45 4 4 4H7ZM5 6V9C5 9.55 5.45 10 6 10H6.18C6.06 9.36 6 8.69 6 8V6H5ZM19 6H18V8C18 8.69 17.94 9.36 17.82 10H18C18.55 10 19 9.55 19 9V6Z"/></svg>
           Most Wanted
+        </button>
+        <button class="nav-tab" data-tab="tab-profile">
+          <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          Profile
         </button>
         <button class="nav-tab" data-tab="tab-settings">
           <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg>
@@ -80,6 +84,20 @@
     </div>
   </div>
 
+  <!-- ========== DAILY RECAP MODAL ========== -->
+  <div class="recap-overlay" id="recapOverlay">
+    <div class="recap-card">
+      <h1 class="recap-title">Daily Recap</h1>
+      <p class="recap-subtitle" id="recapSubtitle"></p>
+
+      <div class="recap-drawings" id="recapDrawings"></div>
+
+      <div class="recap-stats" id="recapStats"></div>
+
+      <button class="welcome-start-btn" id="closeRecap">Got it!</button>
+    </div>
+  </div>
+
   <!-- ========== CONFIRMATION POPUP ========== -->
   <div class="confirm-overlay" id="confirmOverlay">
     <div class="confirm-box">
@@ -103,8 +121,14 @@
       <div class="topic-header">
         <div class="topic-label">Today's Crime</div>
         <h1 class="topic-word" id="word">...</h1>
-        <div class="topic-countdown">
-          Next topic in: <span id="countdown">--:--:--</span>
+        <div class="topic-header-row">
+          <div class="topic-countdown">
+            Next topic in: <span id="countdown">--:--:--</span>
+          </div>
+          <div class="streak-badge" id="streakBadge" style="display:none;">
+            <span class="streak-fire">&#128293;</span>
+            <span class="streak-text" id="streakText"></span>
+          </div>
         </div>
       </div>
 
@@ -252,6 +276,58 @@
       </div>
     </section>
 
+    <!-- ===== PROFILE TAB ===== -->
+    <section id="tab-profile" class="tab-content">
+      <div class="profile-section">
+        <!-- Back button (visible when viewing another user) -->
+        <button class="profile-back" id="profileBack" style="display:none;">&#8592; Back to your profile</button>
+
+        <!-- Profile header -->
+        <div class="profile-header" id="profileHeader">
+          <div class="profile-avatar" id="profileAvatar"></div>
+          <h2 class="profile-name" id="profileName">Anonymous</h2>
+          <div class="profile-joined" id="profileJoined"></div>
+        </div>
+
+        <!-- Stats grid -->
+        <div class="profile-stats" id="profileStats">
+          <div class="profile-stat">
+            <span class="profile-stat-value" id="profileSubmissions">0</span>
+            <span class="profile-stat-label">Submissions</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat-value" id="profileLikes">0</span>
+            <span class="profile-stat-label">Likes</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat-value" id="profileRating">-</span>
+            <span class="profile-stat-label">Avg Rating</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat-value" id="profileStreak">0</span>
+            <span class="profile-stat-label">Streak</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat-value" id="profileLongest">0</span>
+            <span class="profile-stat-label">Best Streak</span>
+          </div>
+        </div>
+
+        <!-- User's drawings grid -->
+        <div class="profile-drawings-section">
+          <h3 class="profile-section-title">Crime Gallery</h3>
+          <div id="profileDrawings" class="gallery-grid"></div>
+        </div>
+
+        <!-- Browse Criminals (only on own profile) -->
+        <div class="profile-browse" id="profileBrowse">
+          <h3 class="profile-section-title">Browse Criminals</h3>
+          <input type="text" class="gallery-search" id="profileSearch" placeholder="Search by name...">
+          <div id="profileCriminals" class="profile-criminals-list"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== SETTINGS TAB ===== -->
     <section id="tab-settings" class="tab-content">
       <div class="settings-section">
@@ -299,6 +375,17 @@
               <button id="musicToggle" class="tool-btn" title="Toggle music" style="width:auto;padding:6px 12px;font-size:13px;">Off</button>
               <input type="range" id="musicVolume" min="0" max="100" value="30">
               <span class="volume-value" id="musicVolumeValue">30%</span>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div>
+              <div class="setting-label">Sound Effects</div>
+              <div class="setting-desc">UI sounds for actions like submit, like, undo</div>
+            </div>
+            <div class="volume-control">
+              <button id="sfxToggle" class="tool-btn" title="Toggle sound effects" style="width:auto;padding:6px 12px;font-size:13px;">On</button>
+              <input type="range" id="sfxVolume" min="0" max="100" value="50">
+              <span class="volume-value" id="sfxVolumeValue">50%</span>
             </div>
           </div>
         </div>
@@ -363,6 +450,69 @@
     </div>
   </div>
 
+  <!-- ========== SUBMISSION DETAIL MODAL ========== -->
+  <div class="detail-overlay" id="detailOverlay">
+    <div class="detail-modal">
+      <button class="detail-close" id="detailClose">&times;</button>
+      <div class="detail-body">
+        <div class="detail-image-wrap">
+          <img id="detailImage" src="" alt="Submission" />
+        </div>
+        <div class="detail-sidebar">
+          <div class="detail-meta">
+            <span class="detail-author" id="detailAuthor"></span>
+            <span class="detail-time" id="detailTime"></span>
+          </div>
+          <div class="detail-actions">
+            <button class="like-btn" id="detailLikeBtn">&#9825; 0</button>
+          </div>
+          <div class="detail-comments-section">
+            <h3 class="detail-comments-title">Comments</h3>
+            <div class="detail-comments-list" id="detailCommentsList"></div>
+            <div class="detail-comment-form" id="detailCommentForm">
+              <input type="text" id="detailCommentName" class="detail-comment-input" placeholder="Your name (optional)" maxlength="24" />
+              <div class="detail-comment-row">
+                <textarea id="detailCommentText" class="detail-comment-textarea" placeholder="Write a comment..." maxlength="500" rows="2"></textarea>
+                <button class="detail-comment-submit" id="detailCommentSubmit">Post</button>
+              </div>
+              <span class="detail-comment-status" id="detailCommentStatus"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== REPLAY MODAL ========== -->
+  <div class="replay-overlay" id="replayOverlay">
+    <div class="replay-modal">
+      <button class="replay-close" id="replayClose">&times;</button>
+      <h3 class="replay-title">Timelapse Replay</h3>
+      <div class="replay-canvas-wrap">
+        <canvas id="replayCanvas" width="1200" height="900"></canvas>
+      </div>
+      <div class="replay-controls">
+        <button class="replay-btn" id="replayPlayPause" title="Play / Pause">
+          <svg class="replay-icon-play" viewBox="0 0 24 24" width="22" height="22"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+          <svg class="replay-icon-pause" viewBox="0 0 24 24" width="22" height="22" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" fill="currentColor"/></svg>
+        </button>
+        <input type="range" id="replayScrubber" class="replay-scrubber" min="0" max="100" value="0" />
+        <span class="replay-time" id="replayTime">0:00</span>
+        <select class="replay-speed" id="replaySpeed">
+          <option value="1">1x</option>
+          <option value="2">2x</option>
+          <option value="4">4x</option>
+          <option value="0.5">0.5x</option>
+        </select>
+        <button class="replay-btn replay-export-btn" id="replayExport" title="Export as video">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 16.5l4-4h-3V3h-2v9.5H8l4 4zm-8 2V21h16v-2.5H4z" fill="currentColor"/></svg>
+          Export
+        </button>
+      </div>
+      <div class="replay-export-status" id="replayExportStatus"></div>
+    </div>
+  </div>
+
   <!-- ========== FOOTER ========== -->
   <footer class="site-footer">
     <div class="footer-inner">
@@ -387,10 +537,11 @@
   </footer>
 
   <!-- ========== SCRIPTS ========== -->
-  <script src="draw.js"></script>
+  <script src="draw.js?v=5"></script>
   <script type="module">
-    import { getTodaysTheme } from './themes.js';
-    import { submitDrawing, getTodaysSubmissions } from './gallery.js';
+    import { getTodaysTheme } from './themes.js?v=2';
+    import { submitDrawing, getTodaysSubmissions, getYesterdaySubmissions, toggleLikeServer, isLikedCached, getMyLikes, getLikeCount, getComments, addComment, rateSubmission, getAverageRating, getMyRatings, getSubmissionsByUser, getTopUsers } from './gallery.js?v=6';
+    import { initSfx, setSfxEnabled, getSfxEnabled, setSfxVolume, getSfxVolume, playSubmitSound, playLikeSound, playUndoSound, playClearSound, playStreakSound } from './sounds.js?v=1';
 
     const today = new Date().toISOString().slice(0, 10);
 
@@ -402,10 +553,16 @@
       initWelcome();
       initSettings();
       initMusic();
+      initSfxSettings();
+      // SFX hooks for drawing tools (draw.js buttons)
+      document.getElementById('undo').addEventListener('click', () => playUndoSound());
+      document.getElementById('clear').addEventListener('click', () => playClearSound());
       checkAlreadySubmitted();
       loadGallery();
       startCountdown();
       syncDisplayName();
+      updateStreakDisplay();
+      checkDailyRecap();
     });
 
     // ── Navigation (tab switching) ────────────────────────
@@ -421,6 +578,7 @@
 
           if (targetId === 'tab-gallery') loadFullGallery();
           if (targetId === 'tab-leaderboard') loadLeaderboard();
+          if (targetId === 'tab-profile') loadProfile();
         });
       });
     }
@@ -578,6 +736,37 @@
       musicPlaying = false;
     }
 
+    // ── Sound Effects Settings ────────────────────────────
+    function initSfxSettings() {
+      initSfx();
+      const toggle = document.getElementById('sfxToggle');
+      const volume = document.getElementById('sfxVolume');
+      const volVal = document.getElementById('sfxVolumeValue');
+
+      // Restore saved state
+      const on = getSfxEnabled();
+      toggle.textContent = on ? 'On' : 'Off';
+      if (on) toggle.classList.add('active');
+      const savedVol = localStorage.getItem('artcrimes_sfx_vol');
+      if (savedVol !== null) {
+        volume.value = savedVol;
+        volVal.textContent = savedVol + '%';
+      }
+
+      toggle.addEventListener('click', () => {
+        const nowOn = !getSfxEnabled();
+        setSfxEnabled(nowOn);
+        toggle.textContent = nowOn ? 'On' : 'Off';
+        toggle.classList.toggle('active', nowOn);
+      });
+
+      volume.addEventListener('input', () => {
+        const v = parseInt(volume.value);
+        volVal.textContent = v + '%';
+        setSfxVolume(v / 100);
+      });
+    }
+
     // ── Countdown to midnight ─────────────────────────────
     function startCountdown() {
       function update() {
@@ -594,6 +783,44 @@
       setInterval(update, 1000);
     }
 
+    // ── Streak Tracking ─────────────────────────────────────
+    function getStreak() {
+      try {
+        return JSON.parse(localStorage.getItem('artcrimes_streak') || '{}');
+      } catch { return {}; }
+    }
+
+    function updateStreakOnSubmit() {
+      const streak = getStreak();
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+      if (streak.lastDate === today) return; // already submitted today
+      if (streak.lastDate === yesterday) {
+        streak.current = (streak.current || 0) + 1;
+      } else {
+        streak.current = 1;
+      }
+      streak.lastDate = today;
+      streak.longest = Math.max(streak.current, streak.longest || 0);
+      localStorage.setItem('artcrimes_streak', JSON.stringify(streak));
+      updateStreakDisplay();
+      // Streak milestone sound
+      if ([7, 14, 30, 50, 100].includes(streak.current)) playStreakSound();
+    }
+
+    function updateStreakDisplay() {
+      const streak = getStreak();
+      const badge = document.getElementById('streakBadge');
+      if (!badge) return;
+      if (streak.current >= 2) {
+        badge.style.display = 'inline-flex';
+        document.getElementById('streakText').textContent = `${streak.current} day streak!`;
+        badge.classList.toggle('streak-hot', streak.current >= 7);
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
     // ── Daily submit limit ────────────────────────────────
     function checkAlreadySubmitted() {
       if (localStorage.getItem('artcrimes_submitted') === today) lockSubmitButton();
@@ -606,6 +833,7 @@
     function markAsSubmitted() {
       localStorage.setItem('artcrimes_submitted', today);
       lockSubmitButton();
+      updateStreakOnSubmit();
     }
 
     // ── Gallery ───────────────────────────────────────────
@@ -617,71 +845,130 @@
       return `${Math.floor(diff / 86400)}d ago`;
     }
 
-    function getLikes(id) {
-      const likes = JSON.parse(localStorage.getItem('artcrimes_likes') || '{}');
-      return likes[id] || 0;
-    }
-    function isLiked(id) {
-      const liked = JSON.parse(localStorage.getItem('artcrimes_liked') || '{}');
-      return !!liked[id];
-    }
-    function toggleLike(id) {
-      const liked = JSON.parse(localStorage.getItem('artcrimes_liked') || '{}');
-      const likes = JSON.parse(localStorage.getItem('artcrimes_likes') || '{}');
-      if (liked[id]) {
-        delete liked[id];
-        likes[id] = Math.max(0, (likes[id] || 1) - 1);
-      } else {
-        liked[id] = true;
-        likes[id] = (likes[id] || 0) + 1;
+    function renderStars(avg, submissionId) {
+      const cached = JSON.parse(localStorage.getItem('artcrimes_ratings_cache') || '{}');
+      const myRating = cached[submissionId] || 0;
+      let stars = '';
+      for (let i = 1; i <= 5; i++) {
+        const filled = i <= Math.round(avg) ? 'filled' : '';
+        const mine = i <= myRating ? 'mine' : '';
+        stars += `<span class="star ${filled} ${mine}" data-star="${i}" data-id="${submissionId}" onclick="event.stopPropagation(); window._rateStar(this, '${submissionId}', ${i})">&#9733;</span>`;
       }
-      localStorage.setItem('artcrimes_liked', JSON.stringify(liked));
-      localStorage.setItem('artcrimes_likes', JSON.stringify(likes));
+      return stars;
     }
 
-    function renderGalleryCards(submissions, container) {
+    function renderGalleryCards(submissions, container, opts = {}) {
       if (!submissions.length) {
         container.innerHTML = '<p class="gallery-empty">No submissions yet. Be the first to commit a crime!</p>';
         return;
       }
+
+      // Find top-rated for crown badge
+      let topId = null;
+      if (submissions.length > 1) {
+        let best = { avg: 0, id: null };
+        submissions.forEach(s => {
+          const avg = s._avgRating || 0;
+          if (avg > best.avg) best = { avg, id: s.id };
+        });
+        if (best.avg >= 1) topId = best.id;
+      }
+
+      // Cache replay data separately (too large for data attribute)
+      if (!window._replayCache) window._replayCache = {};
+      submissions.forEach(s => {
+        if (s.replay_data) window._replayCache[s.id] = s.replay_data;
+      });
+
       container.innerHTML = submissions.map(s => {
         const rot = (Math.random() * 3 - 1.5).toFixed(2);
-        const id = s.id || s.image_url;
-        const likeCount = getLikes(id);
-        const likedClass = isLiked(id) ? 'liked' : '';
+        const id = s.id;
+        const likeCount = s.likes || 0;
+        const liked = isLikedCached(id);
+        const likedClass = liked ? 'liked' : '';
+        const avg = s._avgRating || 0;
+        const ratingCount = s._ratingCount || 0;
+        const isCrown = id === topId;
+        const hasReplay = !!s.replay_data;
         return `
-          <div class="gallery-card" style="--rot: ${rot}deg">
+          <div class="gallery-card ${isCrown ? 'crown-card' : ''}" style="--rot: ${rot}deg" data-submission='${JSON.stringify({id: s.id, image_url: s.image_url, display_name: s.display_name || 'Anonymous', created_at: s.created_at, likes: s.likes || 0, _avgRating: avg, _ratingCount: ratingCount})}' data-has-replay="${hasReplay}">
+            ${isCrown ? '<span class="crown-badge" title="Top rated today">&#128081;</span>' : ''}
+            ${hasReplay ? '<button class="replay-badge" title="Watch timelapse" onclick="event.stopPropagation(); window._openReplay(\'' + id + '\')">&#9654; Replay</button>' : ''}
             <img src="${s.image_url}" alt="Submission by ${s.display_name || 'Anonymous'}" loading="lazy"/>
             <div class="gallery-card-info">
               <span class="card-author">${s.display_name || 'Anonymous'}</span>
               <span>${timeAgo(s.created_at)}</span>
             </div>
             <div class="gallery-card-actions">
-              <button class="like-btn ${likedClass}" data-id="${id}" onclick="window._toggleLike(this, '${id}')">
-                ${isLiked(id) ? '&#10084;' : '&#9825;'} ${likeCount}
+              <button class="like-btn ${likedClass}" data-id="${id}" onclick="event.stopPropagation(); window._toggleLike(this, '${id}')">
+                ${liked ? '&#10084;' : '&#9825;'} ${likeCount}
               </button>
+              <div class="star-rating" data-id="${id}">
+                ${renderStars(avg, id)}
+                <span class="star-avg">${avg > 0 ? avg.toFixed(1) : ''}</span>
+              </div>
             </div>
           </div>
         `;
       }).join('');
+
+      // Card click → open detail modal
+      container.querySelectorAll('.gallery-card').forEach(card => {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', () => {
+          const sub = JSON.parse(card.dataset.submission);
+          openDetailModal(sub);
+        });
+      });
     }
 
-    // Global like handler
-    window._toggleLike = function(btn, id) {
-      toggleLike(id);
-      const count = getLikes(id);
-      const liked = isLiked(id);
-      btn.classList.toggle('liked', liked);
-      btn.innerHTML = `${liked ? '&#10084;' : '&#9825;'} ${count}`;
+    // Global star rating handler
+    window._rateStar = async function(starEl, submissionId, rating) {
+      const ratingWrap = starEl.closest('.star-rating');
+      ratingWrap.classList.add('rating-loading');
+      await rateSubmission(submissionId, rating);
+      const { avg, count } = await getAverageRating(submissionId);
+      // Update all stars in this container
+      ratingWrap.querySelectorAll('.star').forEach(s => {
+        const val = parseInt(s.dataset.star);
+        s.classList.toggle('filled', val <= Math.round(avg));
+        s.classList.toggle('mine', val <= rating);
+      });
+      const avgEl = ratingWrap.querySelector('.star-avg');
+      if (avgEl) avgEl.textContent = avg > 0 ? avg.toFixed(1) : '';
+      ratingWrap.classList.remove('rating-loading');
     };
+
+    // Global like handler (server-backed)
+    window._toggleLike = async function(btn, id) {
+      btn.disabled = true;
+      const result = await toggleLikeServer(id);
+      const freshCount = await getLikeCount(id);
+      btn.classList.toggle('liked', result.liked);
+      btn.innerHTML = `${result.liked ? '&#10084;' : '&#9825;'} ${freshCount}`;
+      btn.disabled = false;
+      if (result.liked) playLikeSound();
+    };
+
+    async function enrichWithRatings(submissions) {
+      // Batch-fetch average ratings for all submissions
+      for (const s of submissions) {
+        const { avg, count } = await getAverageRating(s.id);
+        s._avgRating = avg;
+        s._ratingCount = count;
+      }
+      return submissions;
+    }
 
     async function loadGallery() {
       const submissions = await getTodaysSubmissions();
+      await enrichWithRatings(submissions);
       renderGalleryCards(submissions, document.getElementById('gallery'));
     }
 
     async function loadFullGallery() {
       const submissions = await getTodaysSubmissions();
+      await enrichWithRatings(submissions);
       const container = document.getElementById('galleryFull');
       renderGalleryCards(submissions, container);
 
@@ -698,6 +985,7 @@
     // ── Leaderboard ───────────────────────────────────────
     async function loadLeaderboard() {
       const submissions = await getTodaysSubmissions();
+      await enrichWithRatings(submissions);
       renderLeaderboard(submissions);
 
       // Period filters
@@ -705,7 +993,6 @@
         btn.addEventListener('click', () => {
           document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
-          // For now all periods show today's data (needs backend for historical)
           renderLeaderboard(submissions);
         });
       });
@@ -718,20 +1005,39 @@
         return;
       }
 
-      // Rank by number of submissions per user + likes
+      // Rank by average crime rating + likes
       const userStats = {};
       submissions.forEach(s => {
         const name = s.display_name || 'Anonymous';
-        if (!userStats[name]) userStats[name] = { name, count: 0, latestImg: '', likes: 0, topic: '' };
+        if (!userStats[name]) userStats[name] = { name, count: 0, latestImg: '', likes: 0, totalRating: 0, ratedCount: 0 };
         userStats[name].count++;
         userStats[name].latestImg = s.image_url;
-        userStats[name].topic = s.topic_date;
-        const id = s.id || s.image_url;
-        userStats[name].likes += getLikes(id);
+        userStats[name].likes += (s.likes || 0);
+        if (s._avgRating > 0) {
+          userStats[name].totalRating += s._avgRating;
+          userStats[name].ratedCount++;
+        }
       });
 
-      const ranked = Object.values(userStats).sort((a, b) => (b.count + b.likes) - (a.count + a.likes));
-      const medals = ['&#129351;', '&#129352;', '&#129353;']; // gold, silver, bronze
+      const ranked = Object.values(userStats).map(u => {
+        u.avgRating = u.ratedCount > 0 ? u.totalRating / u.ratedCount : 0;
+        return u;
+      }).sort((a, b) => {
+        // Primary: average rating, secondary: likes, tertiary: submission count
+        if (Math.abs(b.avgRating - a.avgRating) > 0.01) return b.avgRating - a.avgRating;
+        if (b.likes !== a.likes) return b.likes - a.likes;
+        return b.count - a.count;
+      });
+
+      const medals = ['&#129351;', '&#129352;', '&#129353;'];
+
+      function renderMiniStars(avg) {
+        let s = '';
+        for (let i = 1; i <= 5; i++) {
+          s += `<span class="star-mini ${i <= Math.round(avg) ? 'filled' : ''}">&#9733;</span>`;
+        }
+        return s;
+      }
 
       list.innerHTML = ranked.map((u, i) => `
         <div class="leaderboard-item ${i < 3 ? 'top-3' : ''}">
@@ -739,12 +1045,267 @@
           <img src="${u.latestImg}" class="rank-img" alt="${u.name}'s art" loading="lazy">
           <div class="rank-info">
             <div class="rank-name">${u.name}</div>
-            <div class="rank-topic">${u.count} submission${u.count > 1 ? 's' : ''}</div>
+            <div class="rank-topic">${u.count} submission${u.count > 1 ? 's' : ''} &middot; &#10084; ${u.likes}</div>
           </div>
-          <div class="rank-score">&#10084; ${u.likes}</div>
+          <div class="rank-score">
+            <div class="rank-stars">${renderMiniStars(u.avgRating)}</div>
+            <span class="rank-avg">${u.avgRating > 0 ? u.avgRating.toFixed(1) : '-'}</span>
+          </div>
         </div>
       `).join('');
     }
+
+    // ── Profile ───────────────────────────────────────────
+    let profileViewingUser = null; // null = own profile
+
+    function getInitials(name) {
+      if (!name || name === 'Anonymous') return 'A';
+      return name.split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    }
+
+    function getAvatarColor(name) {
+      let hash = 0;
+      for (let i = 0; i < (name || '').length; i++) {
+        hash = ((hash << 5) - hash + name.charCodeAt(i)) | 0;
+      }
+      const hue = Math.abs(hash) % 360;
+      return `hsl(${hue}, 60%, 45%)`;
+    }
+
+    function renderAvatar(name, el) {
+      const initials = getInitials(name);
+      const color = getAvatarColor(name);
+      el.textContent = initials;
+      el.style.background = color;
+    }
+
+    async function loadProfile(userName) {
+      const isOwnProfile = !userName;
+      const name = userName || localStorage.getItem('artcrimes_name') || 'Anonymous';
+      profileViewingUser = isOwnProfile ? null : name;
+
+      // Back button
+      document.getElementById('profileBack').style.display = isOwnProfile ? 'none' : 'block';
+
+      // Header
+      renderAvatar(name, document.getElementById('profileAvatar'));
+      document.getElementById('profileName').textContent = name;
+
+      // Fetch submissions
+      const submissions = await getSubmissionsByUser(name);
+
+      // Join date
+      const joinEl = document.getElementById('profileJoined');
+      if (submissions.length > 0) {
+        const oldest = submissions[submissions.length - 1];
+        const d = new Date(oldest.created_at);
+        joinEl.textContent = 'Joined ' + d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      } else {
+        joinEl.textContent = '';
+      }
+
+      // Stats
+      const totalLikes = submissions.reduce((sum, s) => sum + (s.likes || 0), 0);
+      document.getElementById('profileSubmissions').textContent = submissions.length;
+      document.getElementById('profileLikes').textContent = totalLikes;
+
+      // Average rating across all submissions
+      let totalAvg = 0, ratedCount = 0;
+      for (const s of submissions) {
+        const { avg } = await getAverageRating(s.id);
+        if (avg > 0) { totalAvg += avg; ratedCount++; }
+        s._avgRating = avg;
+      }
+      document.getElementById('profileRating').textContent = ratedCount > 0 ? (totalAvg / ratedCount).toFixed(1) : '-';
+
+      // Streak (only for own profile)
+      if (isOwnProfile) {
+        const streak = getStreak();
+        document.getElementById('profileStreak').textContent = streak.current || 0;
+        document.getElementById('profileLongest').textContent = streak.longest || 0;
+      } else {
+        document.getElementById('profileStreak').textContent = '-';
+        document.getElementById('profileLongest').textContent = '-';
+      }
+
+      // Drawings grid
+      renderGalleryCards(submissions, document.getElementById('profileDrawings'));
+
+      // Browse criminals (only on own profile)
+      const browseSection = document.getElementById('profileBrowse');
+      if (isOwnProfile) {
+        browseSection.style.display = 'block';
+        loadBrowseCriminals();
+      } else {
+        browseSection.style.display = 'none';
+      }
+    }
+
+    async function loadBrowseCriminals() {
+      const users = await getTopUsers(10);
+      renderCriminalsList(users, document.getElementById('profileCriminals'));
+
+      document.getElementById('profileSearch').oninput = function() {
+        const q = this.value.toLowerCase();
+        const filtered = users.filter(u => u.display_name.toLowerCase().includes(q));
+        renderCriminalsList(filtered, document.getElementById('profileCriminals'));
+      };
+    }
+
+    function renderCriminalsList(users, container) {
+      if (!users.length) {
+        container.innerHTML = '<p class="gallery-empty">No criminals found.</p>';
+        return;
+      }
+      container.innerHTML = users.map(u => {
+        const initials = getInitials(u.display_name);
+        const color = getAvatarColor(u.display_name);
+        return `
+          <div class="criminal-item" data-name="${u.display_name}">
+            <div class="criminal-avatar" style="background:${color}">${initials}</div>
+            <div class="criminal-info">
+              <div class="criminal-name">${u.display_name}</div>
+              <div class="criminal-meta">${u.count} submission${u.count !== 1 ? 's' : ''} &middot; &#10084; ${u.total_likes}</div>
+            </div>
+            <span class="criminal-arrow">&#8250;</span>
+          </div>
+        `;
+      }).join('');
+
+      container.querySelectorAll('.criminal-item').forEach(item => {
+        item.addEventListener('click', () => {
+          loadProfile(item.dataset.name);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
+    }
+
+    // Back button handler
+    document.getElementById('profileBack').addEventListener('click', () => {
+      loadProfile(); // reload own profile
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ── Detail Modal (submission detail + comments) ──────
+    let currentDetailId = null;
+
+    async function openDetailModal(sub) {
+      currentDetailId = sub.id;
+      const overlay = document.getElementById('detailOverlay');
+      document.getElementById('detailImage').src = sub.image_url;
+      document.getElementById('detailAuthor').textContent = sub.display_name || 'Anonymous';
+      document.getElementById('detailTime').textContent = timeAgo(sub.created_at);
+
+      // Like button
+      const likeBtn = document.getElementById('detailLikeBtn');
+      const liked = isLikedCached(sub.id);
+      likeBtn.className = 'like-btn' + (liked ? ' liked' : '');
+      likeBtn.innerHTML = `${liked ? '&#10084;' : '&#9825;'} ${sub.likes || 0}`;
+
+      // Show modal
+      overlay.classList.add('active');
+
+      // Load comments
+      const commentsList = document.getElementById('detailCommentsList');
+      commentsList.innerHTML = '<p style="color:var(--text-2);font-size:13px;">Loading comments...</p>';
+      const comments = await getComments(sub.id);
+      renderComments(comments);
+
+      // Refresh like count from server
+      const freshLikes = await getLikeCount(sub.id);
+      likeBtn.innerHTML = `${isLikedCached(sub.id) ? '&#10084;' : '&#9825;'} ${freshLikes}`;
+
+      // Pre-fill comment name from settings
+      const savedName = localStorage.getItem('artcrimes_name') || '';
+      document.getElementById('detailCommentName').value = savedName;
+      document.getElementById('detailCommentText').value = '';
+      document.getElementById('detailCommentStatus').textContent = '';
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detailOverlay').classList.remove('active');
+      currentDetailId = null;
+    }
+
+    function renderComments(comments) {
+      const list = document.getElementById('detailCommentsList');
+      if (!comments.length) {
+        list.innerHTML = '<p style="color:var(--text-2);font-size:13px;">No comments yet. Be the first!</p>';
+        return;
+      }
+      list.innerHTML = comments.map(c => `
+        <div class="detail-comment">
+          <div class="detail-comment-header">
+            <span class="detail-comment-author">${c.display_name || 'Anonymous'}</span>
+            <span class="detail-comment-time">${timeAgo(c.created_at)}</span>
+          </div>
+          <div class="detail-comment-content">${c.content}</div>
+        </div>
+      `).join('');
+    }
+
+    // Detail modal close
+    document.getElementById('detailClose').addEventListener('click', closeDetailModal);
+    document.getElementById('detailOverlay').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('detailOverlay')) closeDetailModal();
+    });
+
+    // Detail modal like button
+    document.getElementById('detailLikeBtn').addEventListener('click', async () => {
+      if (!currentDetailId) return;
+      const btn = document.getElementById('detailLikeBtn');
+      btn.disabled = true;
+      const result = await toggleLikeServer(currentDetailId);
+      const freshCount = await getLikeCount(currentDetailId);
+      btn.className = 'like-btn' + (result.liked ? ' liked' : '');
+      btn.innerHTML = `${result.liked ? '&#10084;' : '&#9825;'} ${freshCount}`;
+      btn.disabled = false;
+      if (result.liked) playLikeSound();
+
+      // Also update the gallery card button if visible
+      const cardBtn = document.querySelector(`.like-btn[data-id="${currentDetailId}"]`);
+      if (cardBtn) {
+        cardBtn.classList.toggle('liked', result.liked);
+        cardBtn.innerHTML = `${result.liked ? '&#10084;' : '&#9825;'} ${freshCount}`;
+      }
+    });
+
+    // Post comment
+    document.getElementById('detailCommentSubmit').addEventListener('click', async () => {
+      if (!currentDetailId) return;
+      const nameInput = document.getElementById('detailCommentName');
+      const textInput = document.getElementById('detailCommentText');
+      const status = document.getElementById('detailCommentStatus');
+      const content = textInput.value.trim();
+
+      if (!content) {
+        status.textContent = 'Write something first!';
+        status.style.color = 'var(--danger)';
+        return;
+      }
+
+      const submitBtn = document.getElementById('detailCommentSubmit');
+      submitBtn.disabled = true;
+      status.textContent = 'Posting...';
+      status.style.color = 'var(--text-2)';
+
+      const result = await addComment(currentDetailId, nameInput.value.trim(), content);
+      if (result.success) {
+        status.textContent = 'Comment posted!';
+        status.style.color = 'var(--success)';
+        textInput.value = '';
+        // Refresh comments
+        const comments = await getComments(currentDetailId);
+        renderComments(comments);
+      } else if (result.error === 'already_commented') {
+        status.textContent = 'You already commented on this submission.';
+        status.style.color = 'var(--warning)';
+      } else {
+        status.textContent = 'Failed to post. Try again.';
+        status.style.color = 'var(--danger)';
+      }
+      submitBtn.disabled = false;
+    });
 
     // ── Merge canvases helper ─────────────────────────────
     function buildMergedCanvas() {
@@ -760,6 +1321,396 @@
     }
 
     // ── Submit button → confirmation popup ────────────────
+    // ── Daily Recap ───────────────────────────────────────
+    async function checkDailyRecap() {
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      const lastRecap = localStorage.getItem('artcrimes_last_recap');
+      if (lastRecap === yesterday) return; // already shown
+
+      // Did user submit yesterday?
+      const submittedDate = localStorage.getItem('artcrimes_submitted');
+      // The submitted date tracks today's submission, but after midnight it becomes "yesterday"
+      // We need to check if the user submitted on the yesterday date
+      const userName = localStorage.getItem('artcrimes_name') || 'Anonymous';
+
+      const submissions = await getYesterdaySubmissions();
+      if (!submissions.length) return;
+
+      // Find user's submission
+      const mySub = submissions.find(s => s.display_name === userName);
+      if (!mySub) return; // user didn't submit yesterday
+
+      // Fetch ratings for all submissions
+      const rated = [];
+      for (const s of submissions) {
+        const { avg, count } = await getAverageRating(s.id);
+        rated.push({ ...s, _avg: avg, _count: count });
+      }
+
+      // Sort by rating to find top and user's rank
+      rated.sort((a, b) => (b._avg || 0) - (a._avg || 0));
+      const top = rated[0];
+      const myRated = rated.find(r => r.id === mySub.id);
+      const myRank = rated.findIndex(r => r.id === mySub.id) + 1;
+      const myLikes = mySub.likes || 0;
+      const myAvg = myRated ? myRated._avg : 0;
+      const topAvg = top ? top._avg : 0;
+
+      // Build recap content
+      const subtitle = document.getElementById('recapSubtitle');
+      subtitle.textContent = `Here's how yesterday went:`;
+
+      const drawings = document.getElementById('recapDrawings');
+      const showTop = top && top.id !== mySub.id;
+      drawings.innerHTML = `
+        <div class="recap-drawing-pair">
+          ${showTop ? `
+          <div class="recap-drawing">
+            <div class="recap-drawing-label">Top Crime</div>
+            <img src="${top.image_url}" alt="Top rated" />
+            <div class="recap-drawing-meta">${top.display_name || 'Anonymous'} &mdash; &#9733; ${topAvg.toFixed(1)}</div>
+          </div>` : ''}
+          <div class="recap-drawing">
+            <div class="recap-drawing-label">${showTop ? 'Your Crime' : 'Your Top Crime'}</div>
+            <img src="${mySub.image_url}" alt="Your drawing" />
+            <div class="recap-drawing-meta">${userName} &mdash; &#9733; ${myAvg.toFixed(1)}</div>
+          </div>
+        </div>
+      `;
+
+      const stats = document.getElementById('recapStats');
+      stats.innerHTML = `
+        <div class="recap-stat-row">
+          ${showTop ? `<div class="recap-stat"><span class="recap-stat-icon">&#128081;</span> Today's top crime was by <b>${top.display_name || 'Anonymous'}</b> with a &#9733;${topAvg.toFixed(1)} rating!</div>` : `<div class="recap-stat"><span class="recap-stat-icon">&#128081;</span> Your crime was the <b>top rated</b> with &#9733;${myAvg.toFixed(1)}!</div>`}
+          <div class="recap-stat"><span class="recap-stat-icon">&#10084;</span> Your drawing got <b>${myLikes} like${myLikes !== 1 ? 's' : ''}</b> and a &#9733;${myAvg.toFixed(1)} average rating</div>
+          <div class="recap-stat"><span class="recap-stat-icon">&#127942;</span> You ranked <b>#${myRank}</b> out of <b>${rated.length}</b> criminal${rated.length !== 1 ? 's' : ''} yesterday</div>
+        </div>
+      `;
+
+      // Show the modal
+      document.getElementById('recapOverlay').classList.add('active');
+      localStorage.setItem('artcrimes_last_recap', yesterday);
+    }
+
+    document.getElementById('closeRecap').addEventListener('click', () => {
+      document.getElementById('recapOverlay').classList.remove('active');
+    });
+    document.getElementById('recapOverlay').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('recapOverlay'))
+        document.getElementById('recapOverlay').classList.remove('active');
+    });
+
+    // ── Replay Engine ──────────────────────────────────────
+    let replayState = {
+      playing: false,
+      actions: [],
+      bgColor: '#fff',
+      currentIdx: 0,
+      timer: null,
+      speed: 1,
+      startTime: 0,
+      totalDuration: 0
+    };
+
+    function replayDrawPolyline(ctx, points, color, width) {
+      if (points.length < 2) {
+        if (points.length === 1) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(points[0].x, points[0].y, width / 2, 0, 2 * Math.PI);
+          ctx.fillStyle = color;
+          ctx.fill();
+          ctx.restore();
+        }
+        return;
+      }
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length - 1; i++) {
+        const midX = (points[i].x + points[i+1].x) / 2;
+        const midY = (points[i].y + points[i+1].y) / 2;
+        ctx.quadraticCurveTo(points[i].x, points[i].y, midX, midY);
+      }
+      ctx.lineTo(points[points.length-1].x, points[points.length-1].y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function replayFloodFill(ctx, startX, startY, fillColor, tolerance, expand) {
+      const W = ctx.canvas.width, H = ctx.canvas.height;
+      const imageData = ctx.getImageData(0, 0, W, H);
+      const data = imageData.data;
+      const pos = (startY * W + startX) * 4;
+      const target = [data[pos], data[pos+1], data[pos+2], data[pos+3]];
+      const fc = hexToRgbaReplay(fillColor);
+      if (matchColor(target, fc, tolerance)) return;
+      const stack = [[startX, startY]];
+      const filled = new Uint8Array(W * H);
+      while (stack.length) {
+        const [x, y] = stack.pop();
+        if (x < 0 || x >= W || y < 0 || y >= H) continue;
+        const idx = y * W + x;
+        if (filled[idx]) continue;
+        filled[idx] = 1;
+        const p = idx * 4;
+        const cur = [data[p], data[p+1], data[p+2], data[p+3]];
+        if (!matchColor(cur, target, tolerance)) continue;
+        data[p] = fc[0]; data[p+1] = fc[1]; data[p+2] = fc[2]; data[p+3] = 255;
+        stack.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);
+      }
+      if (expand > 0) {
+        for (let r = 0; r < expand; r++) {
+          let nf = filled.slice();
+          for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+            if (filled[y*W+x]) {
+              for (const [nx,ny] of [[x+1,y],[x-1,y],[x,y+1],[x,y-1],[x+1,y+1],[x-1,y-1],[x+1,y-1],[x-1,y+1]]) {
+                if (nx>=0 && nx<W && ny>=0 && ny<H && !nf[ny*W+nx]) {
+                  nf[ny*W+nx]=1;
+                  const p2=(ny*W+nx)*4;
+                  data[p2]=fc[0];data[p2+1]=fc[1];data[p2+2]=fc[2];data[p2+3]=255;
+                }
+              }
+            }
+          }
+          filled.set(nf);
+        }
+      }
+      ctx.putImageData(imageData, 0, 0);
+    }
+
+    function matchColor(a, b, t) {
+      return Math.abs(a[0]-b[0])<=t && Math.abs(a[1]-b[1])<=t && Math.abs(a[2]-b[2])<=t && Math.abs(a[3]-b[3])<=t;
+    }
+    function hexToRgbaReplay(hex) {
+      let c = hex.replace('#','');
+      if (c.length===3) c=c[0]+c[0]+c[1]+c[1]+c[2]+c[2];
+      let n=parseInt(c,16);
+      return [n>>16&255, n>>8&255, n&255, 255];
+    }
+
+    // Render replay up to actionIndex (inclusive)
+    function renderReplayFrame(ctx, actions, bgColor, upToIndex) {
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      // Build an action stack honoring undo/redo
+      const stack = [];
+      const redoStack = [];
+      for (let i = 0; i <= upToIndex; i++) {
+        const a = actions[i];
+        if (a.type === 'undo') {
+          if (stack.length) redoStack.push(stack.pop());
+        } else if (a.type === 'redo') {
+          if (redoStack.length) stack.push(redoStack.pop());
+        } else {
+          stack.push(a);
+          redoStack.length = 0;
+        }
+      }
+      // Render the stack
+      for (const a of stack) {
+        if (a.type === 'line') {
+          replayDrawPolyline(ctx, a.points, a.color, a.width);
+        } else if (a.type === 'fill') {
+          replayFloodFill(ctx, a.x, a.y, a.color, a.tolerance || 16, a.expand || 0);
+        } else if (a.type === 'clear') {
+          ctx.fillStyle = bgColor;
+          ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        }
+      }
+    }
+
+    function updateReplayUI() {
+      const scrubber = document.getElementById('replayScrubber');
+      const timeEl = document.getElementById('replayTime');
+      const total = replayState.totalDuration;
+      const current = replayState.currentIdx < replayState.actions.length
+        ? replayState.actions[replayState.currentIdx].timestamp
+        : total;
+      scrubber.max = replayState.actions.length - 1;
+      scrubber.value = replayState.currentIdx;
+      const secs = Math.floor(current / 1000);
+      const mins = Math.floor(secs / 60);
+      timeEl.textContent = `${mins}:${String(secs % 60).padStart(2, '0')}`;
+    }
+
+    function setReplayPlaying(playing) {
+      replayState.playing = playing;
+      const playIcon = document.querySelector('.replay-icon-play');
+      const pauseIcon = document.querySelector('.replay-icon-pause');
+      if (playing) {
+        playIcon.style.display = 'none';
+        pauseIcon.style.display = '';
+      } else {
+        playIcon.style.display = '';
+        pauseIcon.style.display = 'none';
+      }
+    }
+
+    function stopReplay() {
+      setReplayPlaying(false);
+      if (replayState.timer) {
+        clearTimeout(replayState.timer);
+        replayState.timer = null;
+      }
+    }
+
+    function stepReplay() {
+      if (!replayState.playing) return;
+      const canvas = document.getElementById('replayCanvas');
+      const ctx = canvas.getContext('2d');
+      const actions = replayState.actions;
+
+      if (replayState.currentIdx >= actions.length) {
+        stopReplay();
+        return;
+      }
+
+      renderReplayFrame(ctx, actions, replayState.bgColor, replayState.currentIdx);
+      updateReplayUI();
+
+      replayState.currentIdx++;
+
+      if (replayState.currentIdx < actions.length) {
+        const nextTs = actions[replayState.currentIdx].timestamp;
+        const curTs = actions[replayState.currentIdx - 1].timestamp;
+        const delay = Math.max(16, (nextTs - curTs) / replayState.speed);
+        replayState.timer = setTimeout(stepReplay, delay);
+      } else {
+        // Finished
+        stopReplay();
+        updateReplayUI();
+      }
+    }
+
+    function startReplay() {
+      setReplayPlaying(true);
+      stepReplay();
+    }
+
+    window._openReplay = function(submissionId) {
+      const data = window._replayCache && window._replayCache[submissionId];
+      if (!data || !data.actions || !data.actions.length) return;
+
+      stopReplay();
+      replayState.actions = data.actions;
+      replayState.bgColor = data.bgColor || '#fff';
+      replayState.currentIdx = 0;
+      replayState.speed = parseFloat(document.getElementById('replaySpeed').value) || 1;
+      replayState.totalDuration = data.actions[data.actions.length - 1].timestamp;
+
+      const canvas = document.getElementById('replayCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = replayState.bgColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      updateReplayUI();
+
+      document.getElementById('replayOverlay').classList.add('active');
+      document.getElementById('replayExportStatus').textContent = '';
+    };
+
+    // Replay controls
+    document.getElementById('replayPlayPause').addEventListener('click', () => {
+      if (replayState.playing) {
+        stopReplay();
+      } else {
+        if (replayState.currentIdx >= replayState.actions.length) {
+          replayState.currentIdx = 0;
+        }
+        startReplay();
+      }
+    });
+
+    document.getElementById('replayScrubber').addEventListener('input', (e) => {
+      stopReplay();
+      const idx = parseInt(e.target.value);
+      replayState.currentIdx = idx;
+      const canvas = document.getElementById('replayCanvas');
+      const ctx = canvas.getContext('2d');
+      renderReplayFrame(ctx, replayState.actions, replayState.bgColor, idx);
+      updateReplayUI();
+    });
+
+    document.getElementById('replaySpeed').addEventListener('change', (e) => {
+      replayState.speed = parseFloat(e.target.value) || 1;
+    });
+
+    document.getElementById('replayClose').addEventListener('click', () => {
+      stopReplay();
+      document.getElementById('replayOverlay').classList.remove('active');
+    });
+    document.getElementById('replayOverlay').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('replayOverlay')) {
+        stopReplay();
+        document.getElementById('replayOverlay').classList.remove('active');
+      }
+    });
+
+    // .webm export
+    document.getElementById('replayExport').addEventListener('click', async () => {
+      const actions = replayState.actions;
+      if (!actions.length) return;
+      const statusEl = document.getElementById('replayExportStatus');
+      const exportBtn = document.getElementById('replayExport');
+      exportBtn.disabled = true;
+      statusEl.textContent = 'Recording video...';
+
+      stopReplay();
+
+      const canvas = document.getElementById('replayCanvas');
+      const ctx = canvas.getContext('2d');
+      const stream = canvas.captureStream(30);
+      const chunks = [];
+
+      // Try webm, fall back to whatever is available
+      const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+        ? 'video/webm;codecs=vp9'
+        : MediaRecorder.isTypeSupported('video/webm')
+          ? 'video/webm'
+          : '';
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+      recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+
+      const exportDone = new Promise(resolve => { recorder.onstop = resolve; });
+      recorder.start();
+
+      // Play through all actions at 4x speed for export
+      const exportSpeed = 4;
+      ctx.fillStyle = replayState.bgColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < actions.length; i++) {
+        renderReplayFrame(ctx, actions, replayState.bgColor, i);
+        if (i < actions.length - 1) {
+          const delay = Math.max(16, (actions[i+1].timestamp - actions[i].timestamp) / exportSpeed);
+          await new Promise(r => setTimeout(r, delay));
+        }
+      }
+      // Hold final frame for 1 second
+      await new Promise(r => setTimeout(r, 1000));
+
+      recorder.stop();
+      await exportDone;
+
+      const blob = new Blob(chunks, { type: mimeType || 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `artcrime-timelapse.webm`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      statusEl.textContent = 'Exported!';
+      exportBtn.disabled = false;
+      setTimeout(() => { statusEl.textContent = ''; }, 3000);
+    });
+
     document.getElementById('submitDrawing').addEventListener('click', () => {
       const merged = buildMergedCanvas();
       document.getElementById('confirmPreview').src = merged.toDataURL('image/jpeg', 0.7);
@@ -789,11 +1740,16 @@
       merged.id = 'merged-canvas';
       document.body.appendChild(merged);
 
-      const result = await submitDrawing('merged-canvas', name);
+      // Grab replay data before submitting
+      const replayData = window._getReplayData ? window._getReplayData() : null;
+
+      const result = await submitDrawing('merged-canvas', name, replayData);
       document.body.removeChild(merged);
 
       if (result.success) {
         status.textContent = 'Crime submitted!';
+        playSubmitSound();
+        if (window._clearReplayData) window._clearReplayData();
         markAsSubmitted();
         loadGallery();
         setTimeout(() => { status.textContent = ''; }, 3000);
