@@ -1,6 +1,6 @@
 export const themes = [
-  { "date": "2026-04-05", "theme": "Summer" },
-  { "date": "2026-04-06", "theme": "Rain" },
+  { "date": "2026-04-05", "theme": "The final boss of kindergarten" },
+  { "date": "2026-04-06", "theme": "An astronaut’s worst mistake" },
   { "date": "2026-04-07", "theme": "Forest" },
   { "date": "2026-04-08", "theme": "City" },
   { "date": "2026-04-09", "theme": "A frog who just woke up" },
