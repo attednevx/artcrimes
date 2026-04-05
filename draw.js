@@ -705,9 +705,17 @@ drawCanvas.addEventListener('touchstart', function(e) {
     e.preventDefault();
     return;
   }
-  // Single finger = drawing
+  // Single finger
   if (e.touches.length === 1 && !isTouchGesture) {
     e.preventDefault();
+    if (fillMode) {
+      // Fill on touch — store the touch point, actual fill happens in touchend
+      isDrawing = false;
+      const touch = e.touches[0];
+      const { x, y } = getCanvasCoords(touch);
+      currentPoints = [{x, y}];
+      return;
+    }
     isDrawing = true;
     currentPoints = [];
     const touch = e.touches[0];
@@ -753,6 +761,26 @@ drawCanvas.addEventListener('touchend', function(e) {
     isTouchGesture = false;
     // If zoom returned to 1, reset pan
     if (zoomLevel <= 1) { panX = 0; panY = 0; updateTransform(); }
+    return;
+  }
+  // Fill on touch — execute fill when finger lifts
+  if (fillMode && e.touches.length === 0 && currentPoints.length > 0) {
+    e.preventDefault();
+    const pt = currentPoints[0];
+    renderAll();
+    floodFill(ctx, Math.floor(pt.x), Math.floor(pt.y), hexToRgba(currentColor), fillTolerance, expandFill);
+    const fillAct = {
+      type: "fill",
+      x: Math.floor(pt.x),
+      y: Math.floor(pt.y),
+      color: currentColor,
+      tolerance: fillTolerance,
+      expand: expandFill
+    };
+    actions.push(fillAct);
+    recordReplayAction(fillAct);
+    redoActions = [];
+    currentPoints = [];
     return;
   }
   // End drawing when all fingers lifted
