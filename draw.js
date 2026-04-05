@@ -198,6 +198,28 @@ document.getElementById('expandFill').oninput = function(e) {
   document.getElementById('expandFillValue').textContent = expandFill;
 };
 
+// ==== REPLAY RECORDING ====
+let replayActions = [];
+let replayStartTime = null;
+
+function replayTimestamp() {
+  if (!replayStartTime) replayStartTime = Date.now();
+  return Date.now() - replayStartTime;
+}
+
+function recordReplayAction(action) {
+  replayActions.push({ ...action, timestamp: replayTimestamp() });
+}
+
+// Expose replay data + bg color for module script
+window._getReplayData = function() {
+  return { actions: replayActions, bgColor: bgType === "color" ? bgColor : bgType === "custom" ? customBg : "#fff" };
+};
+window._clearReplayData = function() {
+  replayActions = [];
+  replayStartTime = null;
+};
+
 // ==== DRAWING ====
 let actions = [];
 let redoActions = [];
@@ -280,12 +302,14 @@ document.getElementById('undo').onclick = () => {
   if (actions.length > 0) {
     redoActions.push(actions.pop());
     renderAll();
+    recordReplayAction({ type: "undo" });
   }
 };
 document.getElementById('redo').onclick = () => {
   if (redoActions.length > 0) {
     actions.push(redoActions.pop());
     renderAll();
+    recordReplayAction({ type: "redo" });
   }
 };
 window.addEventListener("keydown", function(e){
@@ -390,32 +414,24 @@ window.addEventListener('mouseup', function(e) {
   if (isDrawing && !fillMode) {
     isDrawing = false;
     ctx.putImageData(previewImage, 0, 0);
+    const strokeColor = eraserMode
+      ? (bgType === "color" ? bgColor : bgType === "custom" ? customBg : "#fff")
+      : currentColor;
     if (currentPoints.length === 1) {
       const pt = currentPoints[0];
       ctx.save();
       ctx.beginPath();
       ctx.arc(pt.x, pt.y, lineWidth / 2, 0, 2 * Math.PI);
-      ctx.fillStyle = eraserMode
-        ? (bgType === "color" ? bgColor : bgType === "custom" ? customBg : "#fff")
-        : currentColor;
+      ctx.fillStyle = strokeColor;
       ctx.globalAlpha = 1;
       ctx.fill();
       ctx.restore();
     } else {
-      drawPolylineSmooth(ctx, currentPoints, eraserMode
-        ? (bgType === "color" ? bgColor : bgType === "custom" ? customBg : "#fff")
-        : currentColor,
-        lineWidth
-      );
+      drawPolylineSmooth(ctx, currentPoints, strokeColor, lineWidth);
     }
-    actions.push({
-      type: "line",
-      points: currentPoints.slice(),
-      color: eraserMode
-        ? (bgType === "color" ? bgColor : bgType === "custom" ? customBg : "#fff")
-        : currentColor,
-      width: lineWidth
-    });
+    const act = { type: "line", points: currentPoints.slice(), color: strokeColor, width: lineWidth };
+    actions.push(act);
+    recordReplayAction(act);
     redoActions = [];
     currentPoints = [];
   }
@@ -443,14 +459,16 @@ drawCanvas.addEventListener('mouseleave', function(e) {
         lineWidth
       );
     }
-    actions.push({
+    const act = {
       type: "line",
       points: currentPoints.slice(),
       color: eraserMode
         ? (bgType === "color" ? bgColor : bgType === "custom" ? customBg : "#fff")
         : currentColor,
       width: lineWidth
-    });
+    };
+    actions.push(act);
+    recordReplayAction(act);
     redoActions = [];
     currentPoints = [];
   }
@@ -464,14 +482,16 @@ drawCanvas.addEventListener('click', function(e) {
   renderAll();
   const { x, y } = getCanvasCoords(e);
   floodFill(ctx, Math.floor(x), Math.floor(y), hexToRgba(currentColor), fillTolerance, expandFill);
-  actions.push({
+  const fillAct = {
     type: "fill",
     x: Math.floor(x),
     y: Math.floor(y),
     color: currentColor,
     tolerance: fillTolerance,
     expand: expandFill
-  });
+  };
+  actions.push(fillAct);
+  recordReplayAction(fillAct);
   redoActions = [];
 });
 
@@ -598,6 +618,7 @@ document.getElementById('canvasWrap').addEventListener('wheel', function(e) {
 // ==== CLEAR ====
 document.getElementById('clear').onclick = () => {
   actions.push({type: "clear"});
+  recordReplayAction({ type: "clear" });
   redoActions = [];
   renderAll();
 };
@@ -647,23 +668,45 @@ document.getElementById('closeModal').onclick = () => {
   document.getElementById('shareModal').style.display = 'none';
 };
 
-// === TOUCH EVENTS FOR MOBILE ===
-// --- Panning sa dva prsta kad je zoom ---
-let isTouchPanning = false;
-let touchPanStartX = 0, touchPanStartY = 0, touchPanOriginX = 0, touchPanOriginY = 0;
+// === TOUCH EVENTS FOR MOBILE (pan + pinch-to-zoom + draw) ===
+
+// Helpers
+function getTouchDistance(t1, t2) {
+  return Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+}
+function getTouchMidpoint(t1, t2) {
+  return { x: (t1.clientX + t2.clientX) / 2, y: (t1.clientY + t2.clientY) / 2 };
+}
+
+// Two-finger gesture state
+let isTouchGesture = false;
+let pinchStartDist = 0;
+let pinchStartZoom = 1;
+let touchPanStartX = 0, touchPanStartY = 0;
+let touchPanOriginX = 0, touchPanOriginY = 0;
 
 drawCanvas.addEventListener('touchstart', function(e) {
-  if (zoomLevel > 1 && e.touches.length === 2) {
-    // Dva prsta = panning
-    isTouchPanning = true;
-    touchPanStartX = e.touches[0].clientX;
-    touchPanStartY = e.touches[0].clientY;
+  if (e.touches.length === 2) {
+    // Cancel any in-progress drawing when second finger arrives
+    if (isDrawing) {
+      isDrawing = false;
+      if (previewImage) ctx.putImageData(previewImage, 0, 0);
+      currentPoints = [];
+    }
+    // Start pinch + pan gesture
+    isTouchGesture = true;
+    pinchStartDist = getTouchDistance(e.touches[0], e.touches[1]);
+    pinchStartZoom = zoomLevel;
+    const mid = getTouchMidpoint(e.touches[0], e.touches[1]);
+    touchPanStartX = mid.x;
+    touchPanStartY = mid.y;
     touchPanOriginX = panX;
     touchPanOriginY = panY;
+    e.preventDefault();
     return;
   }
-  // Jedan prst = crtanje
-  if (e.touches.length === 1) {
+  // Single finger = drawing
+  if (e.touches.length === 1 && !isTouchGesture) {
     e.preventDefault();
     isDrawing = true;
     currentPoints = [];
@@ -676,20 +719,26 @@ drawCanvas.addEventListener('touchstart', function(e) {
 }, { passive: false });
 
 drawCanvas.addEventListener('touchmove', function(e) {
-  if (isTouchPanning && zoomLevel > 1 && e.touches.length === 2) {
+  // Two-finger: pinch zoom + pan simultaneously
+  if (isTouchGesture && e.touches.length === 2) {
     e.preventDefault();
-    let dx = e.touches[0].clientX - touchPanStartX;
-    let dy = e.touches[0].clientY - touchPanStartY;
-    panX = touchPanOriginX + dx;
-    panY = touchPanOriginY + dy;
+    // Pinch zoom
+    const newDist = getTouchDistance(e.touches[0], e.touches[1]);
+    const ratio = newDist / pinchStartDist;
+    zoomLevel = Math.max(minZoom, Math.min(maxZoom, pinchStartZoom * ratio));
+    // Pan (track midpoint movement)
+    const mid = getTouchMidpoint(e.touches[0], e.touches[1]);
+    panX = touchPanOriginX + (mid.x - touchPanStartX);
+    panY = touchPanOriginY + (mid.y - touchPanStartY);
     updateTransform();
     return;
   }
+  // Single finger drawing
   if (!isDrawing || e.touches.length !== 1) return;
   e.preventDefault();
   const touch = e.touches[0];
   const { x, y } = getCanvasCoords(touch);
-  addInterpolatedPoints(currentPoints, x, y); // interpolate missing points!
+  addInterpolatedPoints(currentPoints, x, y);
   ctx.putImageData(previewImage, 0, 0);
   drawPolylineSmooth(ctx, currentPoints, eraserMode
     ? (bgType === "color" ? bgColor : bgType === "custom" ? customBg : "#fff")
@@ -699,12 +748,14 @@ drawCanvas.addEventListener('touchmove', function(e) {
 }, { passive: false });
 
 drawCanvas.addEventListener('touchend', function(e) {
-  // Završetak panninga
-  if (isTouchPanning && (e.touches.length < 2 || zoomLevel <= 1)) {
-    isTouchPanning = false;
+  // End pinch/pan gesture when fewer than 2 fingers
+  if (isTouchGesture && e.touches.length < 2) {
+    isTouchGesture = false;
+    // If zoom returned to 1, reset pan
+    if (zoomLevel <= 1) { panX = 0; panY = 0; updateTransform(); }
     return;
   }
-  // Završetak crtanja
+  // End drawing when all fingers lifted
   if (isDrawing && e.touches.length === 0) {
     e.preventDefault();
     isDrawing = false;
@@ -727,14 +778,16 @@ drawCanvas.addEventListener('touchend', function(e) {
         lineWidth
       );
     }
-    actions.push({
+    const touchAct = {
       type: "line",
       points: currentPoints.slice(),
       color: eraserMode
         ? (bgType === "color" ? bgColor : bgType === "custom" ? customBg : "#fff")
         : currentColor,
       width: lineWidth
-    });
+    };
+    actions.push(touchAct);
+    recordReplayAction(touchAct);
     redoActions = [];
     currentPoints = [];
   }
