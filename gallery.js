@@ -1,17 +1,40 @@
 import { supabase } from './supabase.js'
 
-// Upload drawing and save to DB
-export async function submitDrawing(canvasId, displayName = 'Anonymous') {
+// ── Browser Fingerprint ──────────────────────────────────────
+// Simple hash of user-agent + screen + timezone. Not perfect, but
+// good enough as a lightweight identifier for a free game.
+let _fingerprint = null
+export function getFingerprint() {
+  if (_fingerprint) return _fingerprint
+  const raw = [
+    navigator.userAgent,
+    screen.width + 'x' + screen.height,
+    screen.colorDepth,
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
+    new Date().getTimezoneOffset()
+  ].join('|')
+  // Simple djb2 hash
+  let hash = 5381
+  for (let i = 0; i < raw.length; i++) {
+    hash = ((hash << 5) + hash + raw.charCodeAt(i)) >>> 0
+  }
+  _fingerprint = hash.toString(36)
+  return _fingerprint
+}
+
+
+// ── Submit Drawing ───────────────────────────────────────────
+export async function submitDrawing(canvasId, displayName = 'Anonymous', replayData = null) {
   const canvas = document.getElementById(canvasId)
-  
-  const blob = await new Promise(resolve => 
+
+  const blob = await new Promise(resolve =>
     canvas.toBlob(resolve, 'image/jpeg', 0.7)
   )
-  
+
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`
   const today = new Date().toISOString().slice(0, 10)
 
-  const { error: uploadError } = await supabase
+  const { data: uploadData, error: uploadError } = await supabase
     .storage
     .from('submissions')
     .upload(filename, blob, { contentType: 'image/jpeg' })
@@ -26,13 +49,18 @@ export async function submitDrawing(canvasId, displayName = 'Anonymous') {
     .from('submissions')
     .getPublicUrl(filename)
 
+  const row = {
+    topic_date: today,
+    image_url: publicUrl,
+    display_name: displayName
+  }
+  if (replayData && replayData.actions && replayData.actions.length > 0) {
+    row.replay_data = replayData
+  }
+
   const { error: dbError } = await supabase
     .from('submissions')
-    .insert({
-      topic_date: today,
-      image_url: publicUrl,
-      display_name: displayName
-    })
+    .insert(row)
 
   if (dbError) {
     console.error('DB error:', dbError)
@@ -42,16 +70,17 @@ export async function submitDrawing(canvasId, displayName = 'Anonymous') {
   return { success: true, url: publicUrl }
 }
 
-// Fetch today's submissions (last 20)
+
+// ── Fetch Today's Submissions ────────────────────────────────
 export async function getTodaysSubmissions() {
   const today = new Date().toISOString().slice(0, 10)
-  
+
   const { data, error } = await supabase
     .from('submissions')
     .select('*')
     .eq('topic_date', today)
     .order('created_at', { ascending: false })
-    .limit(20)
+    .limit(50)
 
   if (error) {
     console.error('Fetch error:', error)
@@ -61,74 +90,284 @@ export async function getTodaysSubmissions() {
   return data
 }
 
-// Like a submission
-export async function likeSubmission(id) {
-  const { error } = await supabase.rpc('increment_likes', { row_id: id })
-  if (error) console.error('Like error:', error)
-  return !error
-}
 
-// Dislike a submission
-export async function dislikeSubmission(id) {
-  const { error } = await supabase.rpc('increment_dislikes', { row_id: id })
-  if (error) console.error('Funny error:', error)
-  return !error
-}
+// ── Recap: yesterday's submissions ──────────────────────────
+export async function getYesterdaySubmissions() {
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
 
-// Report a submission
-export async function reportSubmission(id) {
-  const { error } = await supabase
-    .from('submissions')
-    .update({ reported: true })
-    .eq('id', id)
-  if (error) console.error('Report error:', error)
-  return !error
-}
-
-// === ADMIN ONLY ===
-
-export async function getAllSubmissions() {
   const { data, error } = await supabase
     .from('submissions')
     .select('*')
+    .eq('topic_date', yesterday)
     .order('created_at', { ascending: false })
+    .limit(50)
 
   if (error) {
-    console.error('Admin fetch error:', error)
+    console.error('Fetch error:', error)
     return []
   }
   return data
 }
 
-export async function deleteSubmission(id, imageUrl) {
-  const parts = imageUrl.split('/submissions/')
-  const filename = parts[1] ? parts[1].split('?')[0] : null
 
-  if (filename) {
-    const { error: storageError } = await supabase
-      .storage
-      .from('submissions')
-      .remove([filename])
-    if (storageError) console.error('Storage delete error:', storageError)
-  }
+// ── Profile Queries ─────────────────────────────────────────
 
-  const { error: dbError } = await supabase
+// Fetch all submissions by a display name
+export async function getSubmissionsByUser(displayName) {
+  const { data, error } = await supabase
     .from('submissions')
-    .delete()
-    .eq('id', id)
+    .select('*')
+    .eq('display_name', displayName)
+    .order('created_at', { ascending: false })
+    .limit(100)
 
-  if (dbError) {
-    console.error('DB delete error:', dbError)
-    return false
+  if (error) {
+    console.error('User submissions fetch error:', error)
+    return []
   }
-  return true
+  return data
 }
 
-export async function restoreSubmission(id) {
-  const { error } = await supabase
+// Get top active users (by submission count) — returns [{display_name, count, total_likes}]
+export async function getTopUsers(limit = 10) {
+  const { data, error } = await supabase
     .from('submissions')
-    .update({ reported: false })
-    .eq('id', id)
-  if (error) console.error('Restore error:', error)
-  return !error
+    .select('display_name, likes')
+
+  if (error) {
+    console.error('Top users fetch error:', error)
+    return []
+  }
+
+  const stats = {}
+  data.forEach(s => {
+    const name = s.display_name || 'Anonymous'
+    if (!stats[name]) stats[name] = { display_name: name, count: 0, total_likes: 0 }
+    stats[name].count++
+    stats[name].total_likes += (s.likes || 0)
+  })
+
+  return Object.values(stats)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit)
+}
+
+
+// ── Likes (Supabase-backed) ──────────────────────────────────
+
+// Check which submissions this browser has liked (batch query)
+export async function getMyLikes(submissionIds) {
+  if (!submissionIds.length) return new Set()
+  const fp = getFingerprint()
+
+  const { data, error } = await supabase
+    .from('likes')
+    .select('submission_id')
+    .eq('user_fingerprint', fp)
+    .in('submission_id', submissionIds)
+
+  if (error) {
+    console.error('Likes fetch error:', error)
+    return new Set()
+  }
+
+  return new Set(data.map(r => r.submission_id))
+}
+
+// Toggle like: insert or delete from likes table, then update submission count
+export async function toggleLikeServer(submissionId) {
+  const fp = getFingerprint()
+
+  // Check if already liked
+  const { data: existing } = await supabase
+    .from('likes')
+    .select('id')
+    .eq('submission_id', submissionId)
+    .eq('user_fingerprint', fp)
+    .limit(1)
+
+  if (existing && existing.length > 0) {
+    // Unlike: delete the like row
+    await supabase
+      .from('likes')
+      .delete()
+      .eq('submission_id', submissionId)
+      .eq('user_fingerprint', fp)
+
+    // Decrement count
+    await supabase.rpc('decrement_likes', { row_id: submissionId })
+
+    // Update localStorage cache
+    const cache = JSON.parse(localStorage.getItem('artcrimes_liked_cache') || '{}')
+    delete cache[submissionId]
+    localStorage.setItem('artcrimes_liked_cache', JSON.stringify(cache))
+
+    return { liked: false }
+  } else {
+    // Like: insert
+    const { error } = await supabase
+      .from('likes')
+      .insert({ submission_id: submissionId, user_fingerprint: fp })
+
+    if (error) {
+      console.error('Like insert error:', error)
+      return { liked: false, error }
+    }
+
+    // Increment count
+    await supabase.rpc('increment_likes', { row_id: submissionId })
+
+    // Update localStorage cache
+    const cache = JSON.parse(localStorage.getItem('artcrimes_liked_cache') || '{}')
+    cache[submissionId] = true
+    localStorage.setItem('artcrimes_liked_cache', JSON.stringify(cache))
+
+    return { liked: true }
+  }
+}
+
+// Get fresh like count for a single submission
+export async function getLikeCount(submissionId) {
+  const { data, error } = await supabase
+    .from('submissions')
+    .select('likes')
+    .eq('id', submissionId)
+    .single()
+
+  if (error) return 0
+  return data.likes || 0
+}
+
+// Quick check from localStorage cache (for instant UI before server responds)
+export function isLikedCached(submissionId) {
+  const cache = JSON.parse(localStorage.getItem('artcrimes_liked_cache') || '{}')
+  return !!cache[submissionId]
+}
+
+
+// ── Ratings (Supabase-backed) ────────────────────────────────
+
+// Upsert a 1-5 star rating for a submission
+export async function rateSubmission(submissionId, rating) {
+  const fp = getFingerprint()
+  rating = Math.max(1, Math.min(5, Math.round(rating)))
+
+  // Check if already rated
+  const { data: existing } = await supabase
+    .from('ratings')
+    .select('id')
+    .eq('submission_id', submissionId)
+    .eq('user_fingerprint', fp)
+    .limit(1)
+
+  if (existing && existing.length > 0) {
+    // Update existing rating
+    const { error } = await supabase
+      .from('ratings')
+      .update({ rating })
+      .eq('submission_id', submissionId)
+      .eq('user_fingerprint', fp)
+
+    if (error) {
+      console.error('Rating update error:', error)
+      return { success: false, error }
+    }
+  } else {
+    // Insert new rating
+    const { error } = await supabase
+      .from('ratings')
+      .insert({ submission_id: submissionId, rating, user_fingerprint: fp })
+
+    if (error) {
+      console.error('Rating insert error:', error)
+      return { success: false, error }
+    }
+  }
+
+  // Cache locally
+  const cache = JSON.parse(localStorage.getItem('artcrimes_ratings_cache') || '{}')
+  cache[submissionId] = rating
+  localStorage.setItem('artcrimes_ratings_cache', JSON.stringify(cache))
+
+  return { success: true, rating }
+}
+
+// Get average rating for a submission
+export async function getAverageRating(submissionId) {
+  const { data, error } = await supabase
+    .from('ratings')
+    .select('rating')
+    .eq('submission_id', submissionId)
+
+  if (error || !data || !data.length) return { avg: 0, count: 0 }
+  const sum = data.reduce((a, r) => a + r.rating, 0)
+  return { avg: sum / data.length, count: data.length }
+}
+
+// Batch: get this user's ratings for a list of submission IDs
+export async function getMyRatings(submissionIds) {
+  if (!submissionIds.length) return {}
+  const fp = getFingerprint()
+
+  const { data, error } = await supabase
+    .from('ratings')
+    .select('submission_id, rating')
+    .eq('user_fingerprint', fp)
+    .in('submission_id', submissionIds)
+
+  if (error) return {}
+  const map = {}
+  data.forEach(r => { map[r.submission_id] = r.rating })
+  return map
+}
+
+
+// ── Comments (Supabase-backed) ───────────────────────────────
+
+export async function getComments(submissionId) {
+  const { data, error } = await supabase
+    .from('comments')
+    .select('*')
+    .eq('submission_id', submissionId)
+    .order('created_at', { ascending: true })
+    .limit(100)
+
+  if (error) {
+    console.error('Comments fetch error:', error)
+    return []
+  }
+  return data
+}
+
+export async function addComment(submissionId, displayName, content) {
+  const fp = getFingerprint()
+
+  // Rate-limit: max 1 comment per submission per fingerprint
+  const { data: existing } = await supabase
+    .from('comments')
+    .select('id')
+    .eq('submission_id', submissionId)
+    .eq('user_fingerprint', fp)
+    .limit(1)
+
+  if (existing && existing.length > 0) {
+    return { success: false, error: 'already_commented' }
+  }
+
+  const { data, error } = await supabase
+    .from('comments')
+    .insert({
+      submission_id: submissionId,
+      display_name: displayName || 'Anonymous',
+      content: content.slice(0, 500),
+      user_fingerprint: fp
+    })
+    .select()
+
+  if (error) {
+    console.error('Comment insert error:', error)
+    return { success: false, error }
+  }
+
+  return { success: true, data }
 }
