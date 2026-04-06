@@ -1267,6 +1267,7 @@
 
     // Global star rating handler
     window._rateStar = async function(starEl, submissionId, rating) {
+      if (!currentAuthUser || !currentAuthProfile) { openAuthModal('email'); return; }
       const ratingWrap = starEl.closest('.star-rating');
       ratingWrap.classList.add('rating-loading');
       await rateSubmission(submissionId, rating);
@@ -1293,6 +1294,7 @@
 
     // Global like handler (server-backed)
     window._toggleLike = async function(btn, id) {
+      if (!currentAuthUser || !currentAuthProfile) { openAuthModal('email'); return; }
       btn.disabled = true;
       const result = await toggleLikeServer(id);
       const freshCount = await getLikeCount(id);
@@ -1661,6 +1663,7 @@
     // Detail modal like button
     document.getElementById('detailLikeBtn').addEventListener('click', async () => {
       if (!currentDetailId) return;
+      if (!currentAuthUser || !currentAuthProfile) { openAuthModal('email'); return; }
       const btn = document.getElementById('detailLikeBtn');
       btn.disabled = true;
       const result = await toggleLikeServer(currentDetailId);
@@ -1681,6 +1684,7 @@
     // Post comment
     document.getElementById('detailCommentSubmit').addEventListener('click', async () => {
       if (!currentDetailId) return;
+      if (!currentAuthUser || !currentAuthProfile) { openAuthModal('email'); return; }
       const nameInput = document.getElementById('detailCommentName');
       const textInput = document.getElementById('detailCommentText');
       const status = document.getElementById('detailCommentStatus');
