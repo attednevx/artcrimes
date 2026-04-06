@@ -651,7 +651,7 @@
     const today = new Date().toISOString().slice(0, 10);
 
     // ── Init ──────────────────────────────────────────────
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('word').textContent = getTodaysTheme();
       initTheme();
       initNavigation();
@@ -659,7 +659,7 @@
       initSettings();
       initMusic();
       initSfxSettings();
-      initAuth();
+      await initAuth();
       initAuthModal();
       // SFX hooks for drawing tools (draw.js buttons)
       document.getElementById('undo').addEventListener('click', () => playUndoSound());
@@ -1196,9 +1196,9 @@
 
     // ── Daily submit limit ────────────────────────────────
     async function checkAlreadySubmitted() {
-      // Check database if logged in
-      if (currentAuthUser) {
-        const submitted = await hasUserSubmittedToday(currentAuthUser.id);
+      // Check database by username if logged in
+      if (currentAuthProfile && currentAuthProfile.username) {
+        const submitted = await hasUserSubmittedToday(currentAuthProfile.username);
         if (submitted) { lockSubmitButton(); return; }
       }
       // Fallback to localStorage
@@ -2189,6 +2189,17 @@
       const userId = currentAuthUser ? currentAuthUser.id : null;
 
       overlay.classList.remove('active');
+
+      // Double-check against database before submitting
+      if (currentAuthProfile && currentAuthProfile.username) {
+        const alreadyDone = await hasUserSubmittedToday(currentAuthProfile.username);
+        if (alreadyDone) {
+          status.textContent = 'You already submitted today!';
+          lockSubmitButton();
+          return;
+        }
+      }
+
       status.textContent = 'Submitting...';
       document.getElementById('submitDrawing').disabled = true;
 
