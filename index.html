@@ -42,6 +42,11 @@
           Settings
         </button>
       </div>
+      <!-- Auth nav button (right side) -->
+      <button class="nav-auth-btn" id="navAuthBtn" title="Log In">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor"/></svg>
+        <span id="navAuthLabel">Log In</span>
+      </button>
     </div>
   </nav>
 
@@ -95,6 +100,50 @@
       <div class="recap-stats" id="recapStats"></div>
 
       <button class="welcome-start-btn" id="closeRecap">Got it!</button>
+    </div>
+  </div>
+
+  <!-- ========== AUTH MODAL ========== -->
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-card">
+      <!-- Screen 1: Email Entry -->
+      <div class="auth-screen" id="authScreenEmail">
+        <h1 class="auth-title">Join Art Crimes</h1>
+        <p class="auth-subtitle">Protect your username. Track your crimes.</p>
+        <div class="auth-form">
+          <input type="email" id="authEmail" class="auth-input" placeholder="Your email address" />
+          <button class="welcome-start-btn" id="authSendLink">Send Magic Link</button>
+          <p class="auth-hint">We'll send you a link to sign in — no password needed.</p>
+        </div>
+        <div class="auth-error" id="authEmailError"></div>
+        <button class="auth-skip" id="authSkip">Continue as Anonymous</button>
+      </div>
+
+      <!-- Screen 2: Check Email -->
+      <div class="auth-screen" id="authScreenCheck" style="display:none;">
+        <h1 class="auth-title">Check Your Email</h1>
+        <p class="auth-subtitle">We sent a magic link to <b id="authSentEmail"></b>. Click it to sign in.</p>
+        <div class="auth-form">
+          <button class="tool-btn" id="authResend" style="width:100%;padding:10px;">Didn't get it? Send again</button>
+          <div class="auth-cooldown" id="authCooldown"></div>
+        </div>
+        <button class="auth-back" id="authBackToEmail">&#8592; Back</button>
+      </div>
+
+      <!-- Screen 3: Choose Username -->
+      <div class="auth-screen" id="authScreenUsername" style="display:none;">
+        <h1 class="auth-title">Choose Your Username</h1>
+        <p class="auth-subtitle">This is how other criminals will know you.</p>
+        <div class="auth-form">
+          <div class="auth-username-wrap">
+            <input type="text" id="authUsername" class="auth-input" placeholder="Username" maxlength="20" />
+            <span class="auth-username-status" id="authUsernameStatus"></span>
+          </div>
+          <p class="auth-rules">3-20 characters, letters, numbers, _ and - only</p>
+          <button class="welcome-start-btn" id="authClaimBtn" disabled>Claim Username</button>
+        </div>
+        <div class="auth-error" id="authUsernameError"></div>
+      </div>
     </div>
   </div>
 
@@ -233,7 +282,19 @@
 
       <!-- Submit Section -->
       <div class="submit-section">
-        <input type="text" id="displayName" placeholder="Your name (optional)" maxlength="24" class="name-input"/>
+        <div class="submit-identity" id="submitIdentity">
+          <!-- Logged in: shows verified username badge -->
+          <div class="submit-as-user" id="submitAsUser" style="display:none;">
+            <span class="submit-as-label">Submitting as:</span>
+            <span class="submit-username-badge" id="submitUsernameBadge"></span>
+          </div>
+          <!-- Logged out: shows anonymous + signup prompt -->
+          <div class="submit-as-anon" id="submitAsAnon">
+            <span class="submit-anon-label">Submitting as Anonymous</span>
+            <button class="submit-signup-link" id="submitSignupLink">Create a profile to submit with your own name!</button>
+          </div>
+        </div>
+        <input type="hidden" id="displayName" value="Anonymous"/>
         <button id="submitDrawing" class="submit-btn">Submit Crime</button>
         <span id="submitStatus" class="submit-status"></span>
       </div>
@@ -278,15 +339,48 @@
 
     <!-- ===== PROFILE TAB ===== -->
     <section id="tab-profile" class="tab-content">
-      <div class="profile-section">
+      <!-- Logged-out state -->
+      <div class="profile-guest" id="profileGuest">
+        <div class="profile-guest-card">
+          <h2 class="profile-guest-title">Join Art Crimes</h2>
+          <p class="profile-guest-desc">Create a profile to protect your username, track your stats, and build your criminal record.</p>
+          <button class="welcome-start-btn" id="profileCreateBtn">Create Profile</button>
+        </div>
+      </div>
+
+      <!-- Logged-in state -->
+      <div class="profile-section" id="profileSection" style="display:none;">
         <!-- Back button (visible when viewing another user) -->
         <button class="profile-back" id="profileBack" style="display:none;">&#8592; Back to your profile</button>
 
         <!-- Profile header -->
         <div class="profile-header" id="profileHeader">
           <div class="profile-avatar" id="profileAvatar"></div>
-          <h2 class="profile-name" id="profileName">Anonymous</h2>
-          <div class="profile-joined" id="profileJoined"></div>
+          <div class="profile-header-info">
+            <h2 class="profile-name" id="profileName">Anonymous</h2>
+            <div class="profile-bio" id="profileBio"></div>
+            <div class="profile-joined" id="profileJoined"></div>
+          </div>
+          <div class="profile-header-actions" id="profileHeaderActions">
+            <button class="tool-btn" id="profileEditBtn" style="font-size:13px;padding:6px 14px;">Edit Profile</button>
+            <button class="tool-btn" id="profileLogoutBtn" style="font-size:13px;padding:6px 14px;">Log Out</button>
+          </div>
+        </div>
+
+        <!-- Edit profile inline (hidden by default) -->
+        <div class="profile-edit-form" id="profileEditForm" style="display:none;">
+          <div class="profile-edit-row">
+            <label>Bio</label>
+            <textarea id="profileBioInput" maxlength="200" rows="2" placeholder="Tell us about your crimes..."></textarea>
+          </div>
+          <div class="profile-edit-row">
+            <label>Avatar Color</label>
+            <input type="color" id="profileColorInput" value="#7c5cfc" />
+          </div>
+          <div class="profile-edit-actions">
+            <button class="submit-btn" id="profileSaveBtn" style="padding:8px 20px;font-size:13px;">Save</button>
+            <button class="tool-btn" id="profileCancelEdit" style="font-size:13px;padding:6px 14px;">Cancel</button>
+          </div>
         </div>
 
         <!-- Stats grid -->
@@ -310,6 +404,10 @@
           <div class="profile-stat">
             <span class="profile-stat-value" id="profileLongest">0</span>
             <span class="profile-stat-label">Best Streak</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat-value" id="profileMemberSince">-</span>
+            <span class="profile-stat-label">Member Since</span>
           </div>
         </div>
 
@@ -336,15 +434,15 @@
           <p>Customize your Art Crimes experience</p>
         </div>
 
-        <!-- Profile -->
+        <!-- Profile / Account -->
         <div class="settings-group">
-          <div class="settings-group-title">Profile</div>
-          <div class="setting-item">
+          <div class="settings-group-title">Account</div>
+          <div class="setting-item" id="settingsAccountInfo">
             <div>
-              <div class="setting-label">Display Name</div>
-              <div class="setting-desc">Shown on your submissions</div>
+              <div class="setting-label" id="settingsAccountLabel">Not logged in</div>
+              <div class="setting-desc" id="settingsAccountDesc">Create a profile to protect your username</div>
             </div>
-            <input type="text" id="settingsName" class="settings-input" placeholder="Anonymous" maxlength="24">
+            <button class="tool-btn" id="settingsAuthBtn" style="width:auto;padding:6px 14px;font-size:13px;">Log In</button>
           </div>
         </div>
 
@@ -540,8 +638,13 @@
   <script src="draw.js?v=6"></script>
   <script type="module">
     import { getTodaysTheme } from './themes.js?v=2';
-    import { submitDrawing, getTodaysSubmissions, getYesterdaySubmissions, toggleLikeServer, isLikedCached, getMyLikes, getLikeCount, getComments, addComment, rateSubmission, getAverageRating, getMyRatings, getSubmissionsByUser, getTopUsers } from './gallery.js?v=6';
+    import { submitDrawing, getTodaysSubmissions, getYesterdaySubmissions, toggleLikeServer, isLikedCached, getMyLikes, getLikeCount, getComments, addComment, rateSubmission, getAverageRating, getMyRatings, getSubmissionsByUser, getTopUsers } from './gallery.js?v=7';
     import { initSfx, setSfxEnabled, getSfxEnabled, setSfxVolume, getSfxVolume, playSubmitSound, playLikeSound, playUndoSound, playClearSound, playStreakSound } from './sounds.js?v=1';
+    import { getCurrentUser, getCurrentProfile, getProfile, getProfileByUsername, sendMagicLink, claimUsername, isUsernameAvailable, updateProfile, logout, onAuthChange, needsUsername } from './auth.js?v=1';
+
+    // ── Auth State ───────────────────────────────────────
+    let currentAuthUser = null;
+    let currentAuthProfile = null;
 
     const today = new Date().toISOString().slice(0, 10);
 
@@ -554,13 +657,14 @@
       initSettings();
       initMusic();
       initSfxSettings();
+      initAuth();
+      initAuthModal();
       // SFX hooks for drawing tools (draw.js buttons)
       document.getElementById('undo').addEventListener('click', () => playUndoSound());
       document.getElementById('clear').addEventListener('click', () => playClearSound());
       checkAlreadySubmitted();
       loadGallery();
       startCountdown();
-      syncDisplayName();
       updateStreakDisplay();
       checkDailyRecap();
     });
@@ -630,25 +734,18 @@
         });
       });
 
-      // Display name sync
-      const nameInput = document.getElementById('settingsName');
-      nameInput.value = localStorage.getItem('artcrimes_name') || '';
-      nameInput.addEventListener('input', () => {
-        localStorage.setItem('artcrimes_name', nameInput.value.trim());
-        document.getElementById('displayName').value = nameInput.value.trim();
-      });
-    }
-
-    function syncDisplayName() {
-      const saved = localStorage.getItem('artcrimes_name');
-      if (saved) {
-        document.getElementById('displayName').value = saved;
-        document.getElementById('settingsName').value = saved;
-      }
-      document.getElementById('displayName').addEventListener('input', () => {
-        const val = document.getElementById('displayName').value.trim();
-        localStorage.setItem('artcrimes_name', val);
-        document.getElementById('settingsName').value = val;
+      // Settings auth button
+      document.getElementById('settingsAuthBtn').addEventListener('click', () => {
+        if (currentAuthUser) {
+          // Already logged in — go to profile
+          document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.getElementById('tab-profile').classList.add('active');
+          document.querySelector('[data-tab="tab-profile"]').classList.add('active');
+          loadProfile();
+        } else {
+          openAuthModal();
+        }
       });
     }
 
@@ -765,6 +862,247 @@
         volVal.textContent = v + '%';
         setSfxVolume(v / 100);
       });
+    }
+
+    // ── Auth ─────────────────────────────────────────────
+    function openAuthModal(screen) {
+      const overlay = document.getElementById('authOverlay');
+      // Reset to email screen
+      document.getElementById('authScreenEmail').style.display = '';
+      document.getElementById('authScreenCheck').style.display = 'none';
+      document.getElementById('authScreenUsername').style.display = 'none';
+      document.getElementById('authEmailError').textContent = '';
+      document.getElementById('authEmail').value = '';
+      if (screen === 'username') {
+        document.getElementById('authScreenEmail').style.display = 'none';
+        document.getElementById('authScreenUsername').style.display = '';
+      }
+      overlay.classList.add('active');
+    }
+    function closeAuthModal() {
+      document.getElementById('authOverlay').classList.remove('active');
+    }
+
+    function initAuthModal() {
+      // Open auth modal from various triggers
+      document.getElementById('navAuthBtn').addEventListener('click', () => {
+        if (currentAuthUser) {
+          // Go to profile tab
+          document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.getElementById('tab-profile').classList.add('active');
+          document.querySelector('[data-tab="tab-profile"]').classList.add('active');
+          loadProfile();
+        } else {
+          openAuthModal();
+        }
+      });
+      document.getElementById('submitSignupLink').addEventListener('click', () => openAuthModal());
+      document.getElementById('profileCreateBtn').addEventListener('click', () => openAuthModal());
+      document.getElementById('authSkip').addEventListener('click', closeAuthModal);
+      document.getElementById('authOverlay').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('authOverlay')) closeAuthModal();
+      });
+
+      // Screen 1: Send magic link
+      document.getElementById('authSendLink').addEventListener('click', async () => {
+        const email = document.getElementById('authEmail').value.trim();
+        const errEl = document.getElementById('authEmailError');
+        if (!email || !email.includes('@')) {
+          errEl.textContent = 'Please enter a valid email address.';
+          return;
+        }
+        errEl.textContent = '';
+        document.getElementById('authSendLink').disabled = true;
+        document.getElementById('authSendLink').textContent = 'Sending...';
+        const result = await sendMagicLink(email);
+        document.getElementById('authSendLink').disabled = false;
+        document.getElementById('authSendLink').textContent = 'Send Magic Link';
+        if (result.success) {
+          document.getElementById('authSentEmail').textContent = email;
+          document.getElementById('authScreenEmail').style.display = 'none';
+          document.getElementById('authScreenCheck').style.display = '';
+          startResendCooldown();
+        } else {
+          errEl.textContent = result.error || 'Failed to send. Try again.';
+        }
+      });
+
+      // Screen 2: Back and Resend
+      document.getElementById('authBackToEmail').addEventListener('click', () => {
+        document.getElementById('authScreenCheck').style.display = 'none';
+        document.getElementById('authScreenEmail').style.display = '';
+      });
+      let resendTimer = null;
+      function startResendCooldown() {
+        const btn = document.getElementById('authResend');
+        const cd = document.getElementById('authCooldown');
+        btn.disabled = true;
+        let remaining = 60;
+        cd.textContent = `Wait ${remaining}s before resending`;
+        if (resendTimer) clearInterval(resendTimer);
+        resendTimer = setInterval(() => {
+          remaining--;
+          if (remaining <= 0) {
+            clearInterval(resendTimer);
+            btn.disabled = false;
+            cd.textContent = '';
+          } else {
+            cd.textContent = `Wait ${remaining}s before resending`;
+          }
+        }, 1000);
+      }
+      document.getElementById('authResend').addEventListener('click', async () => {
+        const email = document.getElementById('authSentEmail').textContent;
+        await sendMagicLink(email);
+        startResendCooldown();
+      });
+
+      // Screen 3: Choose username
+      let usernameCheckTimer = null;
+      document.getElementById('authUsername').addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        const statusEl = document.getElementById('authUsernameStatus');
+        const claimBtn = document.getElementById('authClaimBtn');
+        const errEl = document.getElementById('authUsernameError');
+        errEl.textContent = '';
+        claimBtn.disabled = true;
+
+        if (val.length < 3) {
+          statusEl.textContent = '';
+          statusEl.className = 'auth-username-status';
+          return;
+        }
+        if (!/^[a-zA-Z0-9_-]+$/.test(val)) {
+          statusEl.textContent = '\u2717';
+          statusEl.className = 'auth-username-status status-bad';
+          errEl.textContent = 'Only letters, numbers, _ and - allowed';
+          return;
+        }
+        statusEl.textContent = '...';
+        statusEl.className = 'auth-username-status';
+        clearTimeout(usernameCheckTimer);
+        usernameCheckTimer = setTimeout(async () => {
+          const result = await isUsernameAvailable(val);
+          if (document.getElementById('authUsername').value.trim() !== val) return; // stale
+          if (result.available) {
+            statusEl.textContent = '\u2713';
+            statusEl.className = 'auth-username-status status-good';
+            claimBtn.disabled = false;
+          } else {
+            statusEl.textContent = '\u2717';
+            statusEl.className = 'auth-username-status status-bad';
+            errEl.textContent = result.error || 'Username not available';
+          }
+        }, 500);
+      });
+
+      document.getElementById('authClaimBtn').addEventListener('click', async () => {
+        const username = document.getElementById('authUsername').value.trim();
+        const errEl = document.getElementById('authUsernameError');
+        const btn = document.getElementById('authClaimBtn');
+        btn.disabled = true;
+        btn.textContent = 'Claiming...';
+        const result = await claimUsername(username);
+        btn.textContent = 'Claim Username';
+        if (result.success) {
+          // Refresh profile
+          currentAuthProfile = await getCurrentProfile();
+          updateAuthUI();
+          closeAuthModal();
+        } else {
+          errEl.textContent = result.error || 'Failed to claim username';
+          btn.disabled = false;
+        }
+      });
+    }
+
+    async function initAuth() {
+      // Check existing session
+      const user = await getCurrentUser();
+      if (user) {
+        currentAuthUser = user;
+        currentAuthProfile = await getProfile(user.id);
+        updateAuthUI();
+        if (currentAuthProfile && needsUsername(currentAuthProfile)) {
+          openAuthModal('username');
+        }
+      }
+
+      // Listen for auth changes (magic link callback, logout, etc.)
+      onAuthChange(async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          currentAuthUser = session.user;
+          currentAuthProfile = await getProfile(session.user.id);
+          updateAuthUI();
+          if (currentAuthProfile && needsUsername(currentAuthProfile)) {
+            closeAuthModal();
+            setTimeout(() => openAuthModal('username'), 300);
+          } else {
+            closeAuthModal();
+          }
+        } else if (event === 'SIGNED_OUT') {
+          currentAuthUser = null;
+          currentAuthProfile = null;
+          updateAuthUI();
+        }
+      });
+    }
+
+    function updateAuthUI() {
+      const navBtn = document.getElementById('navAuthBtn');
+      const navLabel = document.getElementById('navAuthLabel');
+      const submitAsUser = document.getElementById('submitAsUser');
+      const submitAsAnon = document.getElementById('submitAsAnon');
+      const submitBadge = document.getElementById('submitUsernameBadge');
+      const settingsLabel = document.getElementById('settingsAccountLabel');
+      const settingsDesc = document.getElementById('settingsAccountDesc');
+      const settingsBtn = document.getElementById('settingsAuthBtn');
+      const profileGuest = document.getElementById('profileGuest');
+      const profileSection = document.getElementById('profileSection');
+
+      if (currentAuthUser && currentAuthProfile) {
+        const uname = currentAuthProfile.username;
+        const color = currentAuthProfile.avatar_color || '#7c5cfc';
+        const initial = uname.charAt(0).toUpperCase();
+
+        // Navbar
+        navBtn.innerHTML = `<span class="nav-avatar" style="background:${color}">${initial}</span><span id="navAuthLabel">${uname}</span>`;
+        navBtn.title = uname;
+
+        // Submit section
+        submitAsUser.style.display = '';
+        submitAsAnon.style.display = 'none';
+        submitBadge.textContent = uname;
+        document.getElementById('displayName').value = uname;
+
+        // Settings
+        settingsLabel.textContent = uname;
+        settingsDesc.textContent = currentAuthProfile.email;
+        settingsBtn.textContent = 'Profile';
+
+        // Profile tab
+        profileGuest.style.display = 'none';
+        profileSection.style.display = '';
+      } else {
+        // Navbar
+        navBtn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor"/></svg><span id="navAuthLabel">Log In</span>`;
+        navBtn.title = 'Log In';
+
+        // Submit section
+        submitAsUser.style.display = 'none';
+        submitAsAnon.style.display = '';
+        document.getElementById('displayName').value = 'Anonymous';
+
+        // Settings
+        settingsLabel.textContent = 'Not logged in';
+        settingsDesc.textContent = 'Create a profile to protect your username';
+        settingsBtn.textContent = 'Log In';
+
+        // Profile tab
+        profileGuest.style.display = '';
+        profileSection.style.display = 'none';
+      }
     }
 
     // ── Countdown to midnight ─────────────────────────────
@@ -890,13 +1228,16 @@
         const ratingCount = s._ratingCount || 0;
         const isCrown = id === topId;
         const hasReplay = !!s.replay_data;
+        const isRegistered = !!s.user_id;
+        const authorName = s.display_name || 'Anonymous';
+        const authorClass = isRegistered ? 'card-author card-author-verified' : 'card-author card-author-anon';
         return `
-          <div class="gallery-card ${isCrown ? 'crown-card' : ''}" style="--rot: ${rot}deg" data-submission='${JSON.stringify({id: s.id, image_url: s.image_url, display_name: s.display_name || 'Anonymous', created_at: s.created_at, likes: s.likes || 0, _avgRating: avg, _ratingCount: ratingCount})}' data-has-replay="${hasReplay}">
+          <div class="gallery-card ${isCrown ? 'crown-card' : ''}" style="--rot: ${rot}deg" data-submission='${JSON.stringify({id: s.id, image_url: s.image_url, display_name: authorName, created_at: s.created_at, likes: s.likes || 0, _avgRating: avg, _ratingCount: ratingCount, user_id: s.user_id || null})}' data-has-replay="${hasReplay}">
             ${isCrown ? '<span class="crown-badge" title="Top rated today">&#128081;</span>' : ''}
             ${hasReplay ? '<button class="replay-badge" title="Watch timelapse" onclick="event.stopPropagation(); window._openReplay(\'' + id + '\')">&#9654; Replay</button>' : ''}
-            <img src="${s.image_url}" alt="Submission by ${s.display_name || 'Anonymous'}" loading="lazy"/>
+            <img src="${s.image_url}" alt="Submission by ${authorName}" loading="lazy"/>
             <div class="gallery-card-info">
-              <span class="card-author">${s.display_name || 'Anonymous'}</span>
+              <span class="${authorClass}" ${isRegistered ? `onclick="event.stopPropagation(); window._viewProfile('${authorName}')"` : ''}>${authorName}${isRegistered ? ' <svg class="verified-check" viewBox="0 0 24 24" width="12" height="12"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg>' : ''}</span>
               <span>${timeAgo(s.created_at)}</span>
             </div>
             <div class="gallery-card-actions">
@@ -937,6 +1278,15 @@
       const avgEl = ratingWrap.querySelector('.star-avg');
       if (avgEl) avgEl.textContent = avg > 0 ? avg.toFixed(1) : '';
       ratingWrap.classList.remove('rating-loading');
+    };
+
+    // Navigate to user profile
+    window._viewProfile = function(username) {
+      document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab-profile').classList.add('active');
+      document.querySelector('[data-tab="tab-profile"]').classList.add('active');
+      loadProfile(username);
     };
 
     // Global like handler (server-backed)
@@ -1072,36 +1422,65 @@
       return `hsl(${hue}, 60%, 45%)`;
     }
 
-    function renderAvatar(name, el) {
+    function renderAvatar(name, el, profileColor) {
       const initials = getInitials(name);
-      const color = getAvatarColor(name);
+      const color = profileColor || getAvatarColor(name);
       el.textContent = initials;
       el.style.background = color;
     }
 
     async function loadProfile(userName) {
       const isOwnProfile = !userName;
-      const name = userName || localStorage.getItem('artcrimes_name') || 'Anonymous';
+
+      // If not logged in and viewing own profile, show guest card
+      if (isOwnProfile && !currentAuthProfile) {
+        document.getElementById('profileGuest').style.display = '';
+        document.getElementById('profileSection').style.display = 'none';
+        return;
+      }
+      document.getElementById('profileGuest').style.display = 'none';
+      document.getElementById('profileSection').style.display = '';
+
+      const name = userName || (currentAuthProfile ? currentAuthProfile.username : 'Anonymous');
       profileViewingUser = isOwnProfile ? null : name;
 
       // Back button
       document.getElementById('profileBack').style.display = isOwnProfile ? 'none' : 'block';
 
+      // Header actions (edit/logout only on own profile)
+      const headerActions = document.getElementById('profileHeaderActions');
+      headerActions.style.display = isOwnProfile ? '' : 'none';
+
       // Header
-      renderAvatar(name, document.getElementById('profileAvatar'));
+      const profile = isOwnProfile ? currentAuthProfile : await getProfileByUsername(name);
+      const avatarColor = profile ? profile.avatar_color : null;
+      renderAvatar(name, document.getElementById('profileAvatar'), avatarColor);
       document.getElementById('profileName').textContent = name;
+
+      // Bio
+      const bioEl = document.getElementById('profileBio');
+      bioEl.textContent = profile && profile.bio ? profile.bio : '';
 
       // Fetch submissions
       const submissions = await getSubmissionsByUser(name);
 
-      // Join date
+      // Join date / member since
       const joinEl = document.getElementById('profileJoined');
-      if (submissions.length > 0) {
+      const memberSinceEl = document.getElementById('profileMemberSince');
+      if (profile && profile.created_at) {
+        const d = new Date(profile.created_at);
+        const formatted = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        joinEl.textContent = 'Member since ' + formatted;
+        memberSinceEl.textContent = formatted;
+      } else if (submissions.length > 0) {
         const oldest = submissions[submissions.length - 1];
         const d = new Date(oldest.created_at);
-        joinEl.textContent = 'Joined ' + d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        const formatted = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        joinEl.textContent = 'Joined ' + formatted;
+        memberSinceEl.textContent = formatted;
       } else {
         joinEl.textContent = '';
+        memberSinceEl.textContent = '-';
       }
 
       // Stats
@@ -1138,6 +1517,33 @@
         loadBrowseCriminals();
       } else {
         browseSection.style.display = 'none';
+      }
+
+      // Edit profile handlers (own profile only)
+      if (isOwnProfile && profile) {
+        document.getElementById('profileEditBtn').onclick = () => {
+          document.getElementById('profileEditForm').style.display = '';
+          document.getElementById('profileBioInput').value = profile.bio || '';
+          document.getElementById('profileColorInput').value = profile.avatar_color || '#7c5cfc';
+        };
+        document.getElementById('profileCancelEdit').onclick = () => {
+          document.getElementById('profileEditForm').style.display = 'none';
+        };
+        document.getElementById('profileSaveBtn').onclick = async () => {
+          const bio = document.getElementById('profileBioInput').value.trim();
+          const color = document.getElementById('profileColorInput').value;
+          await updateProfile({ bio, avatar_color: color });
+          currentAuthProfile = await getCurrentProfile();
+          document.getElementById('profileEditForm').style.display = 'none';
+          updateAuthUI();
+          loadProfile();
+        };
+        document.getElementById('profileLogoutBtn').onclick = async () => {
+          await logout();
+          currentAuthUser = null;
+          currentAuthProfile = null;
+          updateAuthUI();
+        };
       }
     }
 
@@ -1730,7 +2136,8 @@
     document.getElementById('confirmYes').addEventListener('click', async () => {
       const overlay = document.getElementById('confirmOverlay');
       const status = document.getElementById('submitStatus');
-      const name = document.getElementById('displayName').value.trim() || 'Anonymous';
+      const name = currentAuthProfile ? currentAuthProfile.username : 'Anonymous';
+      const userId = currentAuthUser ? currentAuthUser.id : null;
 
       overlay.classList.remove('active');
       status.textContent = 'Submitting...';
@@ -1743,7 +2150,7 @@
       // Grab replay data before submitting
       const replayData = window._getReplayData ? window._getReplayData() : null;
 
-      const result = await submitDrawing('merged-canvas', name, replayData);
+      const result = await submitDrawing('merged-canvas', name, replayData, userId);
       document.body.removeChild(merged);
 
       if (result.success) {
