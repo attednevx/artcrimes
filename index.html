@@ -2120,6 +2120,10 @@
     });
 
     document.getElementById('submitDrawing').addEventListener('click', () => {
+      if (!currentAuthUser || !currentAuthProfile) {
+        openAuthModal('email');
+        return;
+      }
       const merged = buildMergedCanvas();
       document.getElementById('confirmPreview').src = merged.toDataURL('image/jpeg', 0.7);
       document.getElementById('confirmOverlay').classList.add('active');
