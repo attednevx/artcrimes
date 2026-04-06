@@ -24,7 +24,7 @@ export function getFingerprint() {
 
 
 // ── Submit Drawing ───────────────────────────────────────────
-export async function submitDrawing(canvasId, displayName = 'Anonymous', replayData = null) {
+export async function submitDrawing(canvasId, displayName = 'Anonymous', replayData = null, userId = null) {
   const canvas = document.getElementById(canvasId)
 
   const blob = await new Promise(resolve =>
@@ -54,6 +54,7 @@ export async function submitDrawing(canvasId, displayName = 'Anonymous', replayD
     image_url: publicUrl,
     display_name: displayName
   }
+  if (userId) row.user_id = userId
   if (replayData && replayData.actions && replayData.actions.length > 0) {
     row.replay_data = replayData
   }
