@@ -2186,11 +2186,10 @@ input[type="checkbox"]#gridCheckbox {
 }
 
 /* Profile header with edit/logout */
-.profile-header-info { flex: 1; }
+.profile-header-info { text-align: center; }
 .profile-header-actions {
   display: flex;
   gap: 8px;
-  flex-shrink: 0;
 }
 .profile-bio {
   font-size: 14px;
