@@ -122,12 +122,10 @@
       <!-- Screen 2: Check Email -->
       <div class="auth-screen" id="authScreenCheck" style="display:none;">
         <h1 class="auth-title">Check Your Email</h1>
-        <p class="auth-subtitle">We sent a 6-digit code to <b id="authSentEmail"></b></p>
+        <p class="auth-subtitle">We sent a code to <b id="authSentEmail"></b></p>
         <div class="auth-form">
-          <div class="auth-otp-wrap">
-            <input type="text" id="authOtpCode" class="auth-input auth-otp-input" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" />
-            <button class="welcome-start-btn" id="authVerifyCode">Verify</button>
-          </div>
+          <input type="text" id="authOtpCode" class="auth-input auth-otp-input" placeholder="Enter code" maxlength="8" inputmode="numeric" autocomplete="one-time-code" />
+          <button class="welcome-start-btn" id="authVerifyCode">Verify</button>
           <div class="auth-error" id="authOtpError"></div>
           <button class="tool-btn" id="authResend" style="width:100%;padding:10px;">Didn't get it? Send again</button>
           <div class="auth-cooldown" id="authCooldown"></div>
