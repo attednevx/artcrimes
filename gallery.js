@@ -93,12 +93,12 @@ export async function getTodaysSubmissions() {
 
 
 // ── Check if user already submitted today ───────────────────
-export async function hasUserSubmittedToday(userId) {
+export async function hasUserSubmittedToday(username) {
   const today = new Date().toISOString().slice(0, 10)
   const { data, error } = await supabase
     .from('submissions')
     .select('id')
-    .eq('user_id', userId)
+    .eq('display_name', username)
     .eq('topic_date', today)
     .limit(1)
 
