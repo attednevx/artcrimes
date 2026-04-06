@@ -57,19 +57,6 @@ export async function sendMagicLink(email) {
   if (error) return { success: false, error: error.message }
   return { success: true }
 }
-
-// ── Google OAuth ─────────────────────────────────────────
-export async function signInWithGoogle() {
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: window.location.origin
-    }
-  })
-  if (error) return { success: false, error: error.message }
-  return { success: true }
-}
-
 // ── Username ─────────────────────────────────────────────
 export async function claimUsername(username) {
   const { data, error } = await supabase.rpc('claim_username', {
