@@ -1,4 +1,4 @@
-// ==== ART CRIMES — Auth Module (Supabase Magic Link) ====
+// ==== ART CRIMES — Auth Module (Magic Link + OTP Code) ====
 import { supabase } from './supabase.js'
 
 // ── Current User ─────────────────────────────────────────
@@ -57,6 +57,17 @@ export async function sendMagicLink(email) {
   if (error) return { success: false, error: error.message }
   return { success: true }
 }
+// ── Verify OTP Code ──────────────────────────────────────
+export async function verifyOtp(email, token) {
+  const { data, error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'email'
+  })
+  if (error) return { success: false, error: error.message }
+  return { success: true, session: data.session }
+}
+
 // ── Username ─────────────────────────────────────────────
 export async function claimUsername(username) {
   const { data, error } = await supabase.rpc('claim_username', {
