@@ -640,7 +640,7 @@
   <script src="draw.js?v=7"></script>
   <script type="module">
     import { getTodaysTheme } from './themes.js?v=2';
-    import { submitDrawing, getTodaysSubmissions, getYesterdaySubmissions, toggleLikeServer, isLikedCached, getMyLikes, getLikeCount, getComments, addComment, rateSubmission, getAverageRating, getMyRatings, getSubmissionsByUser, getTopUsers } from './gallery.js?v=7';
+    import { submitDrawing, getTodaysSubmissions, getYesterdaySubmissions, hasUserSubmittedToday, toggleLikeServer, isLikedCached, getMyLikes, getLikeCount, getComments, addComment, rateSubmission, getAverageRating, getMyRatings, getSubmissionsByUser, getTopUsers } from './gallery.js?v=8';
     import { initSfx, setSfxEnabled, getSfxEnabled, setSfxVolume, getSfxVolume, playSubmitSound, playLikeSound, playUndoSound, playClearSound, playStreakSound } from './sounds.js?v=1';
     import { getCurrentUser, getCurrentProfile, getProfile, getProfileByUsername, sendMagicLink, verifyOtp, claimUsername, isUsernameAvailable, updateProfile, logout, onAuthChange, needsUsername } from './auth.js?v=4';
 
@@ -1067,6 +1067,7 @@
           currentAuthUser = session.user;
           currentAuthProfile = await getProfile(session.user.id);
           updateAuthUI();
+          checkAlreadySubmitted();
           if (currentAuthProfile && needsUsername(currentAuthProfile)) {
             closeAuthModal();
             setTimeout(() => openAuthModal('username'), 300);
@@ -1194,7 +1195,13 @@
     }
 
     // ── Daily submit limit ────────────────────────────────
-    function checkAlreadySubmitted() {
+    async function checkAlreadySubmitted() {
+      // Check database if logged in
+      if (currentAuthUser) {
+        const submitted = await hasUserSubmittedToday(currentAuthUser.id);
+        if (submitted) { lockSubmitButton(); return; }
+      }
+      // Fallback to localStorage
       if (localStorage.getItem('artcrimes_submitted') === today) lockSubmitButton();
     }
     function lockSubmitButton() {
