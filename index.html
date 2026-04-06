@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Permanent+Marker&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="draw.css?v=8">
+  <link rel="stylesheet" href="draw.css?v=9">
 </head>
 <body>
 
@@ -122,8 +122,15 @@
       <!-- Screen 2: Check Email -->
       <div class="auth-screen" id="authScreenCheck" style="display:none;">
         <h1 class="auth-title">Check Your Email</h1>
-        <p class="auth-subtitle">We sent a magic link to <b id="authSentEmail"></b>. Click it to sign in.</p>
+        <p class="auth-subtitle">We sent a code to <b id="authSentEmail"></b></p>
         <div class="auth-form">
+          <p class="auth-hint" style="margin-bottom:8px;">Enter the 6-digit code from your email:</p>
+          <div class="auth-otp-wrap">
+            <input type="text" id="authOtpCode" class="auth-input auth-otp-input" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" />
+            <button class="welcome-start-btn" id="authVerifyCode">Verify</button>
+          </div>
+          <div class="auth-error" id="authOtpError"></div>
+          <div class="auth-divider"><span>or click the link in your email</span></div>
           <button class="tool-btn" id="authResend" style="width:100%;padding:10px;">Didn't get it? Send again</button>
           <div class="auth-cooldown" id="authCooldown"></div>
         </div>
@@ -639,7 +646,7 @@
     import { getTodaysTheme } from './themes.js?v=2';
     import { submitDrawing, getTodaysSubmissions, getYesterdaySubmissions, toggleLikeServer, isLikedCached, getMyLikes, getLikeCount, getComments, addComment, rateSubmission, getAverageRating, getMyRatings, getSubmissionsByUser, getTopUsers } from './gallery.js?v=7';
     import { initSfx, setSfxEnabled, getSfxEnabled, setSfxVolume, getSfxVolume, playSubmitSound, playLikeSound, playUndoSound, playClearSound, playStreakSound } from './sounds.js?v=1';
-    import { getCurrentUser, getCurrentProfile, getProfile, getProfileByUsername, sendMagicLink, claimUsername, isUsernameAvailable, updateProfile, logout, onAuthChange, needsUsername } from './auth.js?v=3';
+    import { getCurrentUser, getCurrentProfile, getProfile, getProfileByUsername, sendMagicLink, verifyOtp, claimUsername, isUsernameAvailable, updateProfile, logout, onAuthChange, needsUsername } from './auth.js?v=4';
 
     // ── Auth State ───────────────────────────────────────
     let currentAuthUser = null;
@@ -925,6 +932,36 @@
         } else {
           errEl.textContent = result.error || 'Failed to send. Try again.';
         }
+      });
+
+      // Screen 2: Verify OTP code
+      document.getElementById('authVerifyCode').addEventListener('click', async () => {
+        const code = document.getElementById('authOtpCode').value.trim();
+        const errEl = document.getElementById('authOtpError');
+        const btn = document.getElementById('authVerifyCode');
+        errEl.textContent = '';
+
+        if (!code || code.length < 6) {
+          errEl.textContent = 'Please enter the 6-digit code.';
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Verifying...';
+        const email = document.getElementById('authSentEmail').textContent;
+        const result = await verifyOtp(email, code);
+        btn.disabled = false;
+        btn.textContent = 'Verify';
+
+        if (!result.success) {
+          errEl.textContent = result.error || 'Invalid code. Try again.';
+        }
+        // If success, onAuthChange fires automatically and handles everything
+      });
+
+      // Allow Enter key on OTP input
+      document.getElementById('authOtpCode').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') document.getElementById('authVerifyCode').click();
       });
 
       // Screen 2: Back and Resend
