@@ -568,7 +568,6 @@
             <h3 class="detail-comments-title">Comments</h3>
             <div class="detail-comments-list" id="detailCommentsList"></div>
             <div class="detail-comment-form" id="detailCommentForm">
-              <input type="text" id="detailCommentName" class="detail-comment-input" placeholder="Your name (optional)" maxlength="24" />
               <div class="detail-comment-row">
                 <textarea id="detailCommentText" class="detail-comment-textarea" placeholder="Write a comment..." maxlength="500" rows="2"></textarea>
                 <button class="detail-comment-submit" id="detailCommentSubmit">Post</button>
@@ -1685,10 +1684,10 @@
     document.getElementById('detailCommentSubmit').addEventListener('click', async () => {
       if (!currentDetailId) return;
       if (!currentAuthUser || !currentAuthProfile) { openAuthModal('email'); return; }
-      const nameInput = document.getElementById('detailCommentName');
       const textInput = document.getElementById('detailCommentText');
       const status = document.getElementById('detailCommentStatus');
       const content = textInput.value.trim();
+      const commentName = currentAuthProfile.username;
 
       if (!content) {
         status.textContent = 'Write something first!';
@@ -1701,7 +1700,7 @@
       status.textContent = 'Posting...';
       status.style.color = 'var(--text-2)';
 
-      const result = await addComment(currentDetailId, nameInput.value.trim(), content);
+      const result = await addComment(currentDetailId, commentName, content);
       if (result.success) {
         status.textContent = 'Comment posted!';
         status.style.color = 'var(--success)';
