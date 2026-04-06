@@ -363,6 +363,8 @@ function updateTransform() {
 // --- PAN FIX (robust handlers) ---
 window.addEventListener('keydown', function(e){
   if (e.code === 'Space') {
+    const tag = document.activeElement?.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement?.isContentEditable) return;
     panMode = true;
     document.body.style.cursor = 'grab';
     e.preventDefault();
